@@ -1,0 +1,1233 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Carnet">
+<meta name="theme-color" content="#1c3556">
+<meta name="robots" content="noindex,nofollow">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<style>html{background:#1c3556}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}[hidden]{display:none!important}img{max-width:100%}</style>
+<script>window.CARNET_CONFIG = {"supabaseUrl": "", "supabaseKey": ""};</script>
+<title>Carnet Transit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700&display=swap">
+<style>
+/* Layout: phone-first single column under a sticky ink top bar, with a fixed bottom tab bar and a round "+" button;
+   at ≥900px a left rail replaces the tabs, forms become centred modals and the same lists widen. */
+:root{
+  --bg:#f1f4f8; --surface:#ffffff; --surface-2:#e7ecf2; --fg:#172230; --fg-muted:#5f6e7f; --line:#d3dbe5;
+  --accent:#e2601a; --accent-fg:#ffffff; --accent-soft:#fde8dc;
+  --ink:#1c3556; --ink-fg:#f3f6fa; --ink-muted:#a3b4c9; --ink-2:#25446d; --on-ink-pos:#7fe0b0;
+  --pos:#1b8757; --pos-soft:#dcf3e6; --neg:#c6322d; --neg-soft:#fbe2e0; --warn:#ad6f0c; --warn-soft:#fbedcf;
+  --shadow:0 1px 2px rgba(23,34,48,.06),0 8px 24px rgba(23,34,48,.08);
+  --font:'Barlow',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --font-display:'Barlow Condensed','Barlow',system-ui,sans-serif;
+  --r:14px; --r-sm:10px; --tab-h:62px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0d1319; --surface:#151d27; --surface-2:#1d2733; --fg:#e5ebf2; --fg-muted:#92a0b1; --line:#273340;
+    --accent:#f07b3a; --accent-fg:#1b0c04; --accent-soft:#3b2314;
+    --ink:#0f1720; --ink-fg:#e5ebf2; --ink-muted:#7d8c9e; --ink-2:#1b2735; --on-ink-pos:#6fd9a4;
+    --pos:#3fc383; --pos-soft:#143224; --neg:#f4736d; --neg-soft:#3d1e1d; --warn:#e5aa3f; --warn-soft:#3a2c12;
+    --shadow:0 1px 2px rgba(0,0,0,.35),0 8px 24px rgba(0,0,0,.35);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0d1319; --surface:#151d27; --surface-2:#1d2733; --fg:#e5ebf2; --fg-muted:#92a0b1; --line:#273340;
+  --accent:#f07b3a; --accent-fg:#1b0c04; --accent-soft:#3b2314;
+  --ink:#0f1720; --ink-fg:#e5ebf2; --ink-muted:#7d8c9e; --ink-2:#1b2735; --on-ink-pos:#6fd9a4;
+  --pos:#3fc383; --pos-soft:#143224; --neg:#f4736d; --neg-soft:#3d1e1d; --warn:#e5aa3f; --warn-soft:#3a2c12;
+  --shadow:0 1px 2px rgba(0,0,0,.35),0 8px 24px rgba(0,0,0,.35);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--bg);color:var(--fg);font-family:var(--font);font-size:15px;line-height:1.4;-webkit-font-smoothing:antialiased;margin:0}
+button{font:inherit;color:inherit}
+h1,h2,h3{text-wrap:balance}
+.app{min-height:100%;display:flex;flex-direction:column}
+.topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--ink);color:var(--ink-fg);display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 16px;min-height:54px}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.brand-mark{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:8px;background:var(--accent);color:var(--accent-fg);font-family:var(--font-display);font-weight:700;font-size:15px;letter-spacing:.04em}
+.brand-name{font-family:var(--font-display);font-weight:700;font-size:21px;letter-spacing:.05em;text-transform:uppercase;white-space:nowrap}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;background:var(--ink-2);color:var(--ink-muted);font-size:12px;font-weight:600;letter-spacing:.03em;white-space:nowrap}
+.pill.ok{color:#9fe0bd}
+.main{flex:1;width:100%;max-width:1100px;margin:0 auto;padding-inline:16px;padding-block:16px calc(var(--tab-h) + 28px + env(safe-area-inset-bottom,0px))}
+.rail{display:none}
+.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:20;display:flex;background:var(--surface);border-top:1px solid var(--line);padding:6px 4px calc(6px + env(safe-area-inset-bottom,0px))}
+.tabbar button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 2px;border:0;background:none;color:var(--fg-muted);font-size:11px;font-weight:600;letter-spacing:.02em;border-radius:8px;cursor:pointer}
+.tabbar button svg{width:22px;height:22px}
+.tabbar button.on{color:var(--accent)}
+.fab{position:fixed;right:16px;bottom:calc(var(--tab-h) + 16px + env(safe-area-inset-bottom,0px));width:58px;height:58px;border-radius:50%;border:0;background:var(--accent);color:var(--accent-fg);font-size:32px;line-height:1;box-shadow:var(--shadow);z-index:21;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.fab span{display:block;margin-top:-3px}
+.desk-only{display:none !important}
+@media (min-width:900px){
+  .app{display:grid;grid-template-columns:224px 1fr;grid-template-rows:auto 1fr;min-height:100%}
+  .topbar{grid-column:1/-1}
+  .rail{display:flex;flex-direction:column;gap:4px;padding:18px 12px;border-right:1px solid var(--line);background:var(--surface);position:sticky;top:54px;align-self:start;height:calc(100vh - 54px)}
+  .rail button{display:flex;align-items:center;gap:10px;padding:10px 12px;border:0;background:none;border-radius:10px;text-align:left;font-weight:600;color:var(--fg-muted);cursor:pointer}
+  .rail button svg{width:20px;height:20px}
+  .rail button.on{background:var(--accent-soft);color:var(--accent)}
+  .rail button:hover:not(.on){background:var(--surface-2)}
+  .rail .rail-new{margin-top:auto;background:var(--accent);color:var(--accent-fg);justify-content:center}
+  .rail .rail-new:hover{filter:brightness(.95);background:var(--accent)}
+  .main{padding:28px 36px 56px}
+  .tabbar,.fab{display:none}
+  .desk-only{display:inline-flex !important}
+}
+/* generic */
+.muted{color:var(--fg-muted)}
+.small{font-size:12.5px}
+.num{font-variant-numeric:tabular-nums}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (min-width:900px){.tiles{grid-template-columns:repeat(4,1fr);gap:14px}}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;cursor:pointer;text-align:left;min-width:0}
+.tile:hover{background:var(--surface-2)}
+.tile .lbl{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--fg-muted);font-weight:700}
+.tile .val{font-family:var(--font-display);font-size:32px;font-weight:700;line-height:1.05;font-variant-numeric:tabular-nums;margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tile .sub{font-size:12.5px;color:var(--fg-muted);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tile.neg .val{color:var(--neg)} .tile.pos .val{color:var(--pos)} .tile.warn .val{color:var(--warn)}
+.today{background:var(--ink);color:var(--ink-fg);border-radius:var(--r);padding:14px 16px;margin-bottom:12px}
+.today-h{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:8px}
+.today-h h2{margin:0;font-family:var(--font-display);font-size:19px;text-transform:uppercase;letter-spacing:.05em;font-weight:700}
+.today-h .muted{color:var(--ink-muted);text-transform:capitalize}
+.today-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.today-item{min-width:0}
+.today-item .lbl{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-muted);font-weight:700}
+.today-item .val{font-family:var(--font-display);font-size:30px;font-weight:700;line-height:1.05;font-variant-numeric:tabular-nums;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.today-item .val.pos{color:var(--on-ink-pos)}
+.today-item .sub{font-size:12px;color:var(--ink-muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.today-week{margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.12);font-size:13px;color:var(--ink-muted);font-variant-numeric:tabular-nums}
+.today-week b{color:var(--ink-fg)}
+.section{margin-top:24px}
+.section-h{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:8px}
+.section-h h2{font-family:var(--font-display);font-size:19px;text-transform:uppercase;letter-spacing:.05em;margin:0;font-weight:700}
+.list{display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.row{display:flex;align-items:center;gap:10px;padding:10px 12px 10px 14px;border-top:1px solid var(--line);min-width:0}
+.row:first-child{border-top:0}
+.row-btn{flex:1;display:flex;align-items:center;gap:12px;min-width:0;background:none;border:0;padding:0;color:inherit;text-align:left;cursor:pointer;border-radius:8px}
+.row-btn:hover .t{color:var(--accent)}
+.row .main-col{flex:1;min-width:0}
+.row .t{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row .s{font-size:12.5px;color:var(--fg-muted);overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;line-height:1.3}
+.row .right{display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0}
+.row .amt{font-family:var(--font-display);font-size:21px;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap;line-height:1.1}
+.amt.neg{color:var(--neg)} .amt.pos{color:var(--pos)} .amt.warn{color:var(--warn)}
+.badge{display:inline-flex;align-items:center;justify-content:center;min-width:46px;padding:5px 7px;border-radius:7px;background:var(--ink);color:var(--ink-fg);font-family:var(--font-display);font-weight:700;font-size:14px;letter-spacing:.05em;flex-shrink:0}
+.badge.soft{background:var(--surface-2);color:var(--fg-muted)}
+.chip{display:inline-flex;align-items:center;padding:2px 8px;border-radius:999px;font-size:11.5px;font-weight:700;letter-spacing:.02em;white-space:nowrap}
+.chip.payee{background:var(--pos-soft);color:var(--pos)} .chip.partiel{background:var(--warn-soft);color:var(--warn)} .chip.attente{background:var(--neg-soft);color:var(--neg)}
+.chip.neutral{background:var(--surface-2);color:var(--fg-muted)} .chip.prospect{background:var(--accent-soft);color:var(--accent)}
+.age{font-size:11.5px;font-weight:700}
+.age.warn{color:var(--warn)} .age.neg{color:var(--neg)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:9px 14px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--fg);font-weight:600;cursor:pointer;min-height:40px;white-space:nowrap;text-decoration:none}
+.btn:hover{background:var(--surface-2)}
+.btn-accent{background:var(--accent);border-color:var(--accent);color:var(--accent-fg)}
+.btn-accent:hover{background:var(--accent);filter:brightness(.94)}
+.btn-pos{background:var(--pos);border-color:var(--pos);color:#fff}
+.btn-pos:hover{background:var(--pos);filter:brightness(.94)}
+.btn-ghost{background:transparent;border-color:transparent;color:var(--accent)}
+.btn-danger{color:var(--neg);border-color:var(--neg-soft);background:var(--neg-soft)}
+.btn-danger.armed{background:var(--neg);color:#fff;border-color:var(--neg)}
+.btn-sm{padding:6px 10px;min-height:32px;font-size:13px;border-radius:8px}
+.btn-block{width:100%}
+.btn:disabled{opacity:.55;cursor:default}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.empty{padding:26px 16px;text-align:center;color:var(--fg-muted);background:var(--surface);border:1px dashed var(--line);border-radius:var(--r)}
+.empty b{display:block;color:var(--fg);margin-bottom:4px}
+.banner{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;background:var(--warn-soft);color:var(--warn);border-radius:var(--r-sm);padding:10px 12px;margin-bottom:14px;font-weight:600;font-size:13.5px}
+.banner.info{background:var(--accent-soft);color:var(--accent)}
+.banner .btn{min-height:32px}
+/* forms */
+.field{display:flex;flex-direction:column;gap:5px;margin-bottom:14px;min-width:0}
+.field label,.lbl-sm{font-size:11.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--fg-muted)}
+.field input,.field select,.field textarea{font:inherit;font-size:16px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--fg);width:100%;min-height:44px}
+.field textarea{min-height:120px;resize:vertical;line-height:1.45}
+.field .hint{font-size:12.5px;color:var(--fg-muted)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg button{padding:8px 16px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--fg);font-weight:700;font-family:var(--font-display);font-size:17px;letter-spacing:.04em;cursor:pointer;min-height:42px}
+.seg button.on{background:var(--ink);color:var(--ink-fg);border-color:var(--ink)}
+.stepper{display:flex;align-items:center;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surface)}
+.stepper button{width:46px;height:44px;border:0;background:var(--surface-2);font-size:22px;cursor:pointer;flex-shrink:0}
+.stepper input{border:0 !important;border-radius:0 !important;text-align:center;font-weight:700}
+.switch{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface);cursor:pointer;margin-bottom:10px;font-weight:600}
+.switch input{width:22px;height:22px;accent-color:var(--accent);margin:0;flex-shrink:0}
+.summary{display:flex;justify-content:space-between;gap:8px 16px;background:var(--surface-2);padding:10px 12px;border-radius:10px;font-variant-numeric:tabular-nums;margin-bottom:14px;flex-wrap:wrap;font-size:13px;color:var(--fg-muted)}
+.summary b{font-family:var(--font-display);font-size:19px;color:var(--fg);display:block}
+.summary .pos b{color:var(--pos)} .summary .neg b{color:var(--neg)}
+.form-err{color:var(--neg);font-weight:600;font-size:13.5px;margin-bottom:10px;min-height:0}
+.tarifs{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px}
+/* sheet */
+.sheet-root{position:fixed;inset:0;z-index:40;display:flex;align-items:flex-end;justify-content:center;background:rgba(8,14,22,.55)}
+.sheet{background:var(--bg);color:var(--fg);width:100%;max-height:94%;border-radius:18px 18px 0 0;display:flex;flex-direction:column;box-shadow:var(--shadow);animation:up .2s ease-out}
+.sheet-h{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 16px 8px}
+.sheet-h h3{margin:0;font-family:var(--font-display);font-size:22px;text-transform:uppercase;letter-spacing:.04em;font-weight:700}
+.sheet-x{width:36px;height:36px;border-radius:50%;border:0;background:var(--surface-2);font-size:18px;cursor:pointer}
+.sheet-b{overflow:auto;padding:6px 16px 16px;min-height:0}
+.sheet-f{display:flex;gap:10px;padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line);background:var(--surface);flex-wrap:wrap}
+.sheet-f .btn{flex:1;min-width:130px}
+@media (min-width:900px){.sheet-root{align-items:center}.sheet{width:min(580px,92vw);max-height:88vh;border-radius:16px}.sheet-f{padding-bottom:12px}}
+@keyframes up{from{transform:translateY(24px);opacity:.5}to{transform:none;opacity:1}}
+@media (prefers-reduced-motion:reduce){.sheet{animation:none}}
+/* toasts */
+.toast-root{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(var(--tab-h) + 22px + env(safe-area-inset-bottom,0px));z-index:60;display:flex;flex-direction:column;gap:8px;width:min(92vw,440px);pointer-events:none}
+@media (min-width:900px){.toast-root{bottom:28px}}
+.toast{background:var(--ink);color:var(--ink-fg);padding:10px 14px;border-radius:10px;display:flex;align-items:center;justify-content:space-between;gap:12px;box-shadow:var(--shadow);font-weight:600;font-size:14px;pointer-events:auto}
+.toast .btn{min-height:30px;padding:4px 10px;font-size:13px;background:var(--accent);border-color:var(--accent);color:var(--accent-fg)}
+/* detail */
+.detail-top{display:flex;align-items:center;gap:10px;margin-bottom:14px;min-width:0}
+.detail-top h1{margin:0;font-family:var(--font-display);font-size:26px;text-transform:uppercase;letter-spacing:.03em;flex:1;min-width:0;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;line-height:1.05;overflow-wrap:anywhere}
+.back{width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:var(--surface);font-size:18px;cursor:pointer;flex-shrink:0}
+.balance-card{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px}
+.balance-card .big{font-family:var(--font-display);font-size:40px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1;margin-top:4px}
+.kv{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13.5px;color:var(--fg-muted);margin-top:10px}
+.kv b{color:var(--fg);font-weight:600}
+.tarif-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.tarif{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface);cursor:pointer;text-align:left}
+.tarif:hover{background:var(--surface-2)}
+.tarif .v{font-family:var(--font-display);font-size:20px;font-weight:700;font-variant-numeric:tabular-nums}
+.tarif .v.def{color:var(--fg-muted);font-weight:600}
+/* filters */
+.filters{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.monthnav{display:flex;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.monthnav button{width:40px;height:40px;border:0;background:none;font-size:18px;cursor:pointer}
+.monthnav button:hover{background:var(--surface-2)}
+.monthnav span{min-width:150px;text-align:center;font-weight:700;font-family:var(--font-display);font-size:17px;text-transform:capitalize;letter-spacing:.02em}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chips button{padding:6px 11px;border-radius:999px;border:1px solid var(--line);background:var(--surface);font-size:13px;font-weight:600;color:var(--fg-muted);cursor:pointer;min-height:32px}
+.chips button.on{background:var(--ink);color:var(--ink-fg);border-color:var(--ink)}
+.search{flex:1;min-width:160px;font:inherit;font-size:15px;padding:8px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--fg);min-height:40px}
+.day-h{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--fg-muted);margin:16px 0 6px}
+.totals{display:flex;gap:14px;flex-wrap:wrap;font-size:13.5px;color:var(--fg-muted);margin-top:10px;font-variant-numeric:tabular-nums}
+.totals b{color:var(--fg)}
+.tbl-wrap{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:var(--r)}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:14px}
+th,td{padding:9px 12px;text-align:right;border-top:1px solid var(--line);white-space:nowrap}
+th:first-child,td:first-child{text-align:left;text-transform:capitalize}
+thead th{border-top:0;font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--fg-muted);font-weight:700}
+td.pos{color:var(--pos);font-weight:600}
+.loading{padding:40px 16px;text-align:center;color:var(--fg-muted)}
+.loading .spin{width:28px;height:28px;border-radius:50%;border:3px solid var(--line);border-top-color:var(--accent);margin:0 auto 12px;animation:spin .9s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.loading .spin{animation:none}}
+.private{max-width:480px;margin:60px auto;text-align:center}
+.private h2{font-family:var(--font-display);font-size:26px;text-transform:uppercase}
+.plus-grid{display:grid;gap:16px}
+@media (min-width:900px){.plus-grid{grid-template-columns:1fr 1fr}.plus-grid .wide{grid-column:1/-1}}
+.copybox{font:inherit;font-size:14px;width:100%;min-height:200px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--fg);white-space:pre-wrap;line-height:1.5}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <header class="topbar">
+    <div class="brand"><span class="brand-mark">CT</span><span class="brand-name">Carnet Transit</span></div>
+    <div class="topbar-right">
+      <span class="pill" id="lock-pill" title="Espace privé">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+        <span id="lock-txt">Connexion…</span>
+      </span>
+      <button class="btn btn-accent btn-sm desk-only" id="btn-new-desk" data-act="new-presta">+ Prestation</button>
+    </div>
+  </header>
+  <nav class="rail" id="rail" aria-label="Navigation">
+    <button data-act="tab" data-tab="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg>Accueil</button>
+    <button data-act="tab" data-tab="prestas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h6"/></svg>Prestations</button>
+    <button data-act="tab" data-tab="clients"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><circle cx="17" cy="9" r="2.5"/><path d="M15.5 14.5A5 5 0 0 1 22 19"/></svg>Clients</button>
+    <button data-act="tab" data-tab="fournisseurs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7l9-4 9 4v10l-9 4-9-4z"/><path d="M3 7l9 4 9-4"/><path d="M12 11v10"/></svg>Contacts</button>
+    <button data-act="tab" data-tab="plus"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>Plus</button>
+    <button class="rail-new" data-act="new-presta">+ Nouvelle prestation</button>
+  </nav>
+  <main class="main" id="main">
+    <section class="view" id="view-home"><div class="loading"><div class="spin"></div>Connexion à ton espace privé…</div></section>
+    <section class="view" id="view-prestas" hidden></section>
+    <section class="view" id="view-clients" hidden></section>
+    <section class="view" id="view-fournisseurs" hidden></section>
+    <section class="view" id="view-plus" hidden></section>
+    <section class="view" id="view-detail" hidden></section>
+  </main>
+  <button class="fab" id="fab" data-act="new-presta" aria-label="Nouvelle prestation"><span>+</span></button>
+  <nav class="tabbar" id="tabbar" aria-label="Navigation">
+    <button data-act="tab" data-tab="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg>Accueil</button>
+    <button data-act="tab" data-tab="prestas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h6"/></svg>Prestas</button>
+    <button data-act="tab" data-tab="clients"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><circle cx="17" cy="9" r="2.5"/><path d="M15.5 14.5A5 5 0 0 1 22 19"/></svg>Clients</button>
+    <button data-act="tab" data-tab="fournisseurs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7l9-4 9 4v10l-9 4-9-4z"/><path d="M3 7l9 4 9-4"/><path d="M12 11v10"/></svg>Contacts</button>
+    <button data-act="tab" data-tab="plus"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="1"/><circle cx="5" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg>Plus</button>
+  </nav>
+  <div class="sheet-root" id="sheet-root" hidden></div>
+  <div class="toast-root" id="toast-root"></div>
+</div>
+<script>
+(function(){
+'use strict';
+// ---------- helpers ----------
+const $ = (s, el) => (el||document).querySelector(s);
+const $$ = (s, el) => Array.from((el||document).querySelectorAll(s));
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const num = v => { const n = parseFloat(String(v == null ? '' : v).replace(',', '.')); return isFinite(n) ? n : 0; };
+const r2 = n => Math.round((Number(n) || 0) * 100) / 100;
+const eur = n => {
+  n = r2(n); const neg = n < 0; const a = Math.abs(n);
+  const s = Number.isInteger(a) ? a.toLocaleString('fr-FR') : a.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  return (neg ? '−' : '') + s + ' €';
+};
+const pad2 = n => String(n).padStart(2, '0');
+const isoOf = d => d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate());
+const todayISO = () => isoOf(new Date());
+const nowISO = () => new Date().toISOString();
+const parseISO = s => { const p = String(s || '').split('-').map(Number); return new Date(p[0] || 1970, (p[1] || 1) - 1, p[2] || 1); };
+const fmtDate = s => s ? parseISO(s).toLocaleDateString('fr-FR', {day: '2-digit', month: '2-digit'}) : '';
+const fmtDateY = s => s ? parseISO(s).toLocaleDateString('fr-FR', {day: '2-digit', month: '2-digit', year: 'numeric'}) : '';
+const fmtDateLong = s => parseISO(s).toLocaleDateString('fr-FR', {weekday: 'short', day: 'numeric', month: 'long'});
+const monthKey = s => String(s || '').slice(0, 7);
+const monthLabel = k => { const p = k.split('-').map(Number); return new Date(p[0], p[1] - 1, 1).toLocaleDateString('fr-FR', {month: 'long', year: 'numeric'}); };
+const monthShort = k => { const p = k.split('-').map(Number); return new Date(p[0], p[1] - 1, 1).toLocaleDateString('fr-FR', {month: 'long'}); };
+const shiftMonth = (k, d) => { const p = k.split('-').map(Number); const dt = new Date(p[0], p[1] - 1 + d, 1); return dt.getFullYear() + '-' + pad2(dt.getMonth() + 1); };
+const daysSince = s => Math.round((parseISO(todayISO()) - parseISO(s)) / 86400000);
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+const byDateDesc = (a, b) => String(b.date || '').localeCompare(String(a.date || '')) || String(b.createdAt || '').localeCompare(String(a.createdAt || ''));
+const byDateAsc = (a, b) => -byDateDesc(a, b);
+const byName = (a, b) => String(a.name || '').localeCompare(String(b.name || ''), 'fr');
+const norm = s => String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+const stripId = o => { const c = Object.assign({}, o); delete c.id; return c; };
+const plural = (n, s, p) => n + ' ' + (n > 1 ? (p || s + 's') : s);
+const pref = {
+  get(k, d){ try { const v = localStorage.getItem('ct:' + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v){ try { localStorage.setItem('ct:' + k, JSON.stringify(v)); } catch (e) {} }
+};
+const METHODS = ['Espèces', 'Virement', 'Lydia', 'PayPal', 'Chèque', 'Autre'];
+
+// ---------- state ----------
+const S = { types: [], clients: [], fournisseurs: [], prestations: [], paiements: [], reglements: [], settings: [] };
+const COLLS = Object.keys(S);
+const loaded = new Set();
+let store = null, dlCap = null, isOwner = null;
+let nav = { tab: 'home', detail: null };
+let filters = { month: monthKey(todayISO()), status: 'all', type: 'all', q: '', cq: '', fq: '' };
+let D = null;
+let sheetOpen = false;
+const settings = () => (S.settings.find(s => s.id === 'main') || {});
+
+// ---------- store adapters ----------
+function makeDbStore(db){
+  return {
+    kind: 'db',
+    subscribe(coll, cb){
+      return db.collection(coll).onSnapshot(
+        snap => cb(snap.docs.filter(d => d.exists).map(d => Object.assign({id: d.id}, d.data()))),
+        err => { console.error('db', coll, err); toast('Connexion à la base interrompue : recharge la page.', null, 8000); }
+      );
+    },
+    set(coll, id, data){ return db.doc(coll + '/' + id).set(data); },
+    del(coll, id){ return db.doc(coll + '/' + id).delete(); }
+  };
+}
+function makeLocalStore(){
+  const KEY = 'carnet-transit-local-v1';
+  let data = {};
+  try { data = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) { data = {}; }
+  const subs = {};
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(data)); } catch (e) {} };
+  const rows = coll => Object.keys(data[coll] || {}).map(id => Object.assign({id: id}, data[coll][id]));
+  const emit = coll => (subs[coll] || []).forEach(cb => cb(rows(coll)));
+  return {
+    kind: 'local',
+    subscribe(coll, cb){ (subs[coll] = subs[coll] || []).push(cb); setTimeout(() => cb(rows(coll)), 0); return () => { subs[coll] = (subs[coll] || []).filter(f => f !== cb); }; },
+    async set(coll, id, d){ (data[coll] = data[coll] || {})[id] = JSON.parse(JSON.stringify(d)); save(); emit(coll); },
+    async del(coll, id){ if (data[coll]) { delete data[coll][id]; save(); emit(coll); } }
+  };
+}
+async function write(coll, id, data){
+  try { await store.set(coll, id, data); return true; }
+  catch (e) { console.error(e); toast(writeErr(e), null, 7000); return false; }
+}
+async function remove(coll, id){
+  try { await store.del(coll, id); return true; }
+  catch (e) { console.error(e); toast(writeErr(e), null, 7000); return false; }
+}
+function writeErr(e){
+  const code = e && e.code;
+  if (code === 'quota_exceeded') return 'Base pleine : supprime d’anciennes données avant d’en ajouter.';
+  if (code === 'invalid_argument') return 'Enregistrement refusé : tu n’as pas le droit d’écrire ici.';
+  if (code === 'revoked' || code === 'not_granted') return 'Accès à la base perdu : recharge la page.';
+  return 'Enregistrement impossible pour le moment, réessaie.';
+}
+
+// ---------- derived data ----------
+function groupBy(arr, k){ return arr.reduce((m, x) => { const key = x[k] || ''; (m[key] = m[key] || []).push(x); return m; }, {}); }
+function allocate(items, pays, amtKey){
+  const sorted = items.slice().sort(byDateAsc);
+  const rem = {}; sorted.forEach(p => { rem[p.id] = p[amtKey]; });
+  let pool = 0;
+  pays.forEach(pay => {
+    const a = num(pay.amount);
+    if (pay.prestationId && rem[pay.prestationId] != null) {
+      const al = Math.min(rem[pay.prestationId], a);
+      rem[pay.prestationId] = r2(rem[pay.prestationId] - al);
+      pool = r2(pool + a - al);
+    } else pool = r2(pool + a);
+  });
+  sorted.forEach(p => { const al = Math.min(rem[p.id], pool); if (al > 0) { rem[p.id] = r2(rem[p.id] - al); pool = r2(pool - al); } });
+  return { rem: rem, credit: pool, sorted: sorted };
+}
+const statusOf = (p, rem, amtKey) => rem <= 0.004 ? 'payee' : (rem >= p[amtKey] - 0.004 ? 'attente' : 'partiel');
+function derive(){
+  const typeById = {}; S.types.forEach(t => { typeById[t.id] = t; });
+  const clientById = {}; S.clients.forEach(c => { clientById[c.id] = c; });
+  const fournById = {}; S.fournisseurs.forEach(f => { fournById[f.id] = f; });
+  const P = S.prestations.map(p => {
+    const qty = num(p.qty) || 0, sell = num(p.sell), cost = num(p.cost);
+    return Object.assign({}, p, { qty: qty, sell: sell, cost: cost, total: r2(qty * sell), costTotal: r2(qty * cost), margin: r2(qty * (sell - cost)) });
+  });
+  const pById = {}; P.forEach(p => { pById[p.id] = p; });
+  const pStatus = {}; const clientStats = {}; const fournStats = {};
+  const pByClient = groupBy(P, 'clientId'); const payByClient = groupBy(S.paiements, 'clientId');
+  const cIds = new Set(S.clients.map(c => c.id).concat(Object.keys(pByClient), Object.keys(payByClient)));
+  cIds.forEach(cid => {
+    if (!cid) return;
+    const items = pByClient[cid] || []; const pays = payByClient[cid] || [];
+    const a = allocate(items, pays, 'total');
+    let due = 0, oldest = null, nOpen = 0;
+    a.sorted.forEach(p => {
+      pStatus[p.id] = Object.assign(pStatus[p.id] || {}, { client: statusOf(p, a.rem[p.id], 'total'), clientRem: a.rem[p.id] });
+      if (a.rem[p.id] > 0.004) { due = r2(due + a.rem[p.id]); nOpen++; if (!oldest) oldest = p.date; }
+    });
+    const totalSold = r2(items.reduce((s, p) => s + p.total, 0));
+    const totalPaid = r2(pays.reduce((s, p) => s + num(p.amount), 0));
+    const lastP = items.length ? items.slice().sort(byDateDesc)[0] : null;
+    clientStats[cid] = { due: due, credit: a.credit, balance: r2(due - a.credit), oldest: oldest, nOpen: nOpen, totalSold: totalSold, totalPaid: totalPaid, n: items.length, last: lastP ? lastP.date : null, margin: r2(items.reduce((s, p) => s + p.margin, 0)) };
+  });
+  const pByF = groupBy(P.filter(p => p.fournisseurId), 'fournisseurId'); const regByF = groupBy(S.reglements, 'fournisseurId');
+  const fIds = new Set(S.fournisseurs.map(f => f.id).concat(Object.keys(pByF), Object.keys(regByF)));
+  fIds.forEach(fid => {
+    if (!fid) return;
+    const items = pByF[fid] || []; const regs = regByF[fid] || [];
+    const a = allocate(items, regs, 'costTotal');
+    let due = 0, oldest = null, nOpen = 0;
+    a.sorted.forEach(p => {
+      pStatus[p.id] = Object.assign(pStatus[p.id] || {}, { fourn: statusOf(p, a.rem[p.id], 'costTotal'), fournRem: a.rem[p.id] });
+      if (a.rem[p.id] > 0.004) { due = r2(due + a.rem[p.id]); nOpen++; if (!oldest) oldest = p.date; }
+    });
+    const totalCost = r2(items.reduce((s, p) => s + p.costTotal, 0));
+    const totalPaid = r2(regs.reduce((s, r) => s + num(r.amount), 0));
+    const lastP = items.length ? items.slice().sort(byDateDesc)[0] : null;
+    fournStats[fid] = { due: due, credit: a.credit, balance: r2(due - a.credit), oldest: oldest, nOpen: nOpen, totalCost: totalCost, totalPaid: totalPaid, n: items.length, last: lastP ? lastP.date : null };
+  });
+  P.forEach(p => { pStatus[p.id] = pStatus[p.id] || {}; if (!pStatus[p.id].client) { pStatus[p.id].client = 'attente'; pStatus[p.id].clientRem = p.total; } if (!p.fournisseurId) { pStatus[p.id].fourn = 'none'; pStatus[p.id].fournRem = 0; } });
+  const months = {};
+  const M = k => months[k] = months[k] || { k: k, n: 0, sold: 0, cost: 0, margin: 0, cashIn: 0, cashOut: 0 };
+  P.forEach(p => { const m = M(monthKey(p.date)); m.n++; m.sold = r2(m.sold + p.total); m.cost = r2(m.cost + p.costTotal); m.margin = r2(m.margin + p.margin); });
+  S.paiements.forEach(x => { const m = M(monthKey(x.date)); m.cashIn = r2(m.cashIn + num(x.amount)); });
+  S.reglements.forEach(x => { const m = M(monthKey(x.date)); m.cashOut = r2(m.cashOut + num(x.amount)); });
+  const totalDue = r2(Object.keys(clientStats).reduce((s, k) => s + Math.max(0, clientStats[k].balance), 0));
+  const totalOwed = r2(Object.keys(fournStats).reduce((s, k) => s + Math.max(0, fournStats[k].balance), 0));
+  const hasDemo = COLLS.some(c => S[c].some(d => d.demo));
+  return { typeById: typeById, clientById: clientById, fournById: fournById, P: P, pById: pById, pStatus: pStatus, clientStats: clientStats, fournStats: fournStats, months: months, totalDue: totalDue, totalOwed: totalOwed, hasDemo: hasDemo };
+}
+const clientName = id => (D.clientById[id] || {}).name || 'Client supprimé';
+const fournName = id => id ? ((D.fournById[id] || {}).name || 'Contact supprimé') : '';
+const typeCode = id => (D.typeById[id] || {}).code || '?';
+const sortedTypes = () => S.types.slice().sort((a, b) => (num(a.order) - num(b.order)) || byName(a, b));
+const STATUS_LBL = { payee: 'Payée', partiel: 'Partiel', attente: 'En attente', none: '' };
+// ---------- rendering ----------
+function render(){
+  D = derive();
+  const onTab = t => (nav.tab === t && !nav.detail);
+  $$('#tabbar button, #rail button[data-tab]').forEach(b => b.classList.toggle('on', onTab(b.dataset.tab)));
+  $$('.view').forEach(v => { v.hidden = true; });
+  if (isOwner === false) { const el = $('#view-home'); el.hidden = false; el.innerHTML = privateHTML(); $('#fab').hidden = true; return; }
+  if (loaded.size < COLLS.length) { const el = $('#view-home'); el.hidden = false; return; }
+  if (nav.detail) {
+    const el = $('#view-detail'); el.hidden = false;
+    el.innerHTML = nav.detail.kind === 'client' ? renderClientDetail(nav.detail.id) : renderFournDetail(nav.detail.id);
+  } else {
+    const views = { home: renderHome, prestas: renderPrestas, clients: renderClients, fournisseurs: renderFournisseurs, plus: renderPlus };
+    const el = $('#view-' + nav.tab); el.hidden = false; el.innerHTML = views[nav.tab]();
+  }
+  $('#fab').hidden = sheetOpen;
+}
+function privateHTML(){
+  return '<div class="private card"><h2>Carnet privé</h2><p class="muted">Ce carnet n’est accessible que par son propriétaire. Connecte-toi avec ton compte pour l’ouvrir.</p></div>';
+}
+function banners(){
+  let h = '';
+  if (D.hasDemo) h += '<div class="banner">Des exemples sont affichés pour te montrer le fonctionnement. <button class="btn btn-sm" data-act="purge-demo">Supprimer les exemples</button></div>';
+  if (store && store.kind === 'local') h += '<div class="banner info">Mode local : les données restent dans ce navigateur uniquement (pas de synchronisation téléphone ↔ ordi).</div>';
+  return h;
+}
+function ageHTML(dateStr){
+  if (!dateStr) return '';
+  const d = daysSince(dateStr);
+  const cls = d >= 14 ? 'neg' : (d >= 7 ? 'warn' : '');
+  return '<span class="age ' + cls + '">' + (d <= 0 ? 'aujourd’hui' : 'depuis ' + plural(d, 'jour')) + '</span>';
+}
+function chip(status){ return status && status !== 'none' ? '<span class="chip ' + status + '">' + STATUS_LBL[status] + '</span>' : ''; }
+
+function renderHome(){
+  const nowK = monthKey(todayISO());
+  const m = D.months[nowK] || { n: 0, sold: 0, cost: 0, margin: 0, cashIn: 0, cashOut: 0 };
+  const debtors = Object.keys(D.clientStats).map(id => [id, D.clientStats[id]]).filter(x => x[1].balance > 0.004).sort((a, b) => b[1].balance - a[1].balance);
+  const creditors = Object.keys(D.fournStats).map(id => [id, D.fournStats[id]]).filter(x => x[1].balance > 0.004).sort((a, b) => b[1].balance - a[1].balance);
+  const today = todayISO();
+  const relances = S.clients.filter(c => c.relance && c.relance <= today).sort((a, b) => a.relance.localeCompare(b.relance));
+  const recent = D.P.slice().sort(byDateDesc).slice(0, 6);
+  let h = banners();
+  // today + this week (Monday → today)
+  const todayP = D.P.filter(p => p.date === today);
+  const tMargin = r2(todayP.reduce((s, p) => s + p.margin, 0)), tSold = r2(todayP.reduce((s, p) => s + p.total, 0));
+  const tCash = r2(S.paiements.filter(x => x.date === today).reduce((s, x) => s + num(x.amount), 0));
+  const tOut = r2(S.reglements.filter(x => x.date === today).reduce((s, x) => s + num(x.amount), 0));
+  const dnow = parseISO(today); const dow = (dnow.getDay() + 6) % 7; const monday = new Date(dnow); monday.setDate(dnow.getDate() - dow); const weekStart = isoOf(monday);
+  const weekP = D.P.filter(p => p.date >= weekStart && p.date <= today);
+  const wMargin = r2(weekP.reduce((s, p) => s + p.margin, 0)), wSold = r2(weekP.reduce((s, p) => s + p.total, 0));
+  const wCash = r2(S.paiements.filter(x => x.date >= weekStart && x.date <= today).reduce((s, x) => s + num(x.amount), 0));
+  h += '<div class="today"><div class="today-h"><h2>Aujourd’hui</h2><span class="muted small">' + esc(fmtDateLong(today)) + '</span></div>' +
+    '<div class="today-grid">' +
+    '<div class="today-item"><div class="lbl">Bénéf du jour</div><div class="val ' + (tMargin > 0 ? 'pos' : '') + '">' + eur(tMargin) + '</div></div>' +
+    '<div class="today-item"><div class="lbl">Prestations</div><div class="val">' + todayP.length + '</div><div class="sub">vendu ' + eur(tSold) + '</div></div>' +
+    '<div class="today-item"><div class="lbl">Encaissé</div><div class="val">' + eur(tCash) + '</div><div class="sub">réglé ' + eur(tOut) + '</div></div>' +
+    '</div>' +
+    '<div class="today-week">Cette semaine (depuis lundi) : <b>' + eur(wMargin) + '</b> de bénéf · ' + plural(weekP.length, 'presta') + ' · vendu ' + eur(wSold) + ' · encaissé ' + eur(wCash) + '</div></div>';
+  h += '<div class="tiles">' +
+    '<button class="tile neg" data-act="tab" data-tab="clients"><div class="lbl">On me doit</div><div class="val">' + eur(D.totalDue) + '</div><div class="sub">' + plural(debtors.length, 'client') + '</div></button>' +
+    '<button class="tile warn" data-act="tab" data-tab="fournisseurs"><div class="lbl">Je dois</div><div class="val">' + eur(D.totalOwed) + '</div><div class="sub">' + plural(creditors.length, 'contact') + '</div></button>' +
+    '<button class="tile pos" data-act="tab" data-tab="prestas"><div class="lbl">Bénéf ' + esc(monthShort(nowK)) + '</div><div class="val">' + eur(m.margin) + '</div><div class="sub">' + plural(m.n, 'presta') + ' · vendu ' + eur(m.sold) + '</div></button>' +
+    '<button class="tile" data-act="tab" data-tab="plus"><div class="lbl">Encaissé ' + esc(monthShort(nowK)) + '</div><div class="val">' + eur(m.cashIn) + '</div><div class="sub">réglé aux contacts ' + eur(m.cashOut) + '</div></button>' +
+    '</div>';
+  if (relances.length) {
+    h += '<div class="section"><div class="section-h"><h2>À relancer</h2></div><div class="list">' + relances.map(c =>
+      '<div class="row"><button class="row-btn" data-act="open-client" data-id="' + c.id + '"><span class="badge soft">' + fmtDate(c.relance) + '</span><div class="main-col"><div class="t">' + esc(c.name) + '</div><div class="s">' + ([c.phone, c.note].filter(Boolean).map(esc).join(' · ') || 'relance prévue') + '</div></div></button><button class="btn btn-sm" data-act="relance-done" data-id="' + c.id + '">Fait</button></div>'
+    ).join('') + '</div></div>';
+  }
+  h += '<div class="section"><div class="section-h"><h2>À encaisser</h2><span class="muted small">' + (debtors.length ? eur(D.totalDue) : '') + '</span></div>';
+  h += debtors.length ? '<div class="list">' + debtors.map(x => {
+    const id = x[0], s = x[1];
+    return '<div class="row"><button class="row-btn" data-act="open-client" data-id="' + id + '"><div class="main-col"><div class="t">' + esc(clientName(id)) + '</div><div class="s">' + plural(s.nOpen, 'presta') + ' en attente ' + ageHTML(s.oldest) + '</div></div><div class="right"><span class="amt neg">' + eur(s.balance) + '</span></div></button><button class="btn btn-sm btn-pos" data-act="new-paiement" data-id="' + id + '">Encaisser</button></div>';
+  }).join('') + '</div>' : '<div class="empty"><b>Personne ne te doit rien.</b>Tout est encaissé.</div>';
+  h += '</div>';
+  h += '<div class="section"><div class="section-h"><h2>À régler aux contacts</h2><span class="muted small">' + (creditors.length ? eur(D.totalOwed) : '') + '</span></div>';
+  h += creditors.length ? '<div class="list">' + creditors.map(x => {
+    const id = x[0], s = x[1];
+    return '<div class="row"><button class="row-btn" data-act="open-fourn" data-id="' + id + '"><div class="main-col"><div class="t">' + esc(fournName(id)) + '</div><div class="s">' + plural(s.nOpen, 'document') + ' non réglé' + (s.nOpen > 1 ? 's' : '') + ' ' + ageHTML(s.oldest) + '</div></div><div class="right"><span class="amt warn">' + eur(s.balance) + '</span></div></button><button class="btn btn-sm" data-act="new-reglement" data-id="' + id + '">Régler</button></div>';
+  }).join('') + '</div>' : '<div class="empty"><b>Tu ne dois rien à tes contacts.</b></div>';
+  h += '</div>';
+  h += '<div class="section"><div class="section-h"><h2>Dernières prestations</h2><button class="btn btn-ghost btn-sm" data-act="tab" data-tab="prestas">Tout voir</button></div>';
+  h += recent.length ? '<div class="list">' + recent.map(prestaRow).join('') + '</div>' : '<div class="empty"><b>Aucune prestation pour l’instant.</b>Appuie sur + pour enregistrer la première.</div>';
+  h += '</div>';
+  return h;
+}
+function prestaRow(p, opts){
+  opts = opts || {};
+  const st = D.pStatus[p.id] || {};
+  const who = opts.context === 'client' ? (p.fournisseurId ? 'via ' + esc(fournName(p.fournisseurId)) : 'sans contact') : (opts.context === 'fourn' ? 'pour ' + esc(clientName(p.clientId)) : esc(clientName(p.clientId)));
+  const sub = [fmtDate(p.date), p.qty + ' × ' + eur(p.sell), p.ref ? esc(p.ref) : ''].filter(Boolean).join(' · ');
+  const title = opts.context ? who : esc(clientName(p.clientId));
+  const sub2 = opts.context ? sub : sub + (p.fournisseurId ? ' · via ' + esc(fournName(p.fournisseurId)) : '');
+  let rightChip;
+  if (opts.context === 'fourn') rightChip = st.fourn === 'payee' ? '<span class="chip payee">Réglé</span>' : (st.fourn === 'partiel' ? '<span class="chip partiel">Reste ' + eur(st.fournRem) + '</span>' : '<span class="chip attente">À régler</span>');
+  else rightChip = st.client === 'partiel' ? '<span class="chip partiel">Reste ' + eur(st.clientRem) + '</span>' : chip(st.client);
+  const amount = opts.context === 'fourn' ? eur(p.costTotal) : eur(p.total);
+  const margin = opts.context === 'fourn' ? '' : '<span class="small muted num">bénéf ' + eur(p.margin) + '</span>';
+  return '<div class="row"><button class="row-btn" data-act="edit-presta" data-id="' + p.id + '"><span class="badge">' + esc(typeCode(p.typeId)) + '</span><div class="main-col"><div class="t">' + title + '</div><div class="s">' + sub2 + '</div></div><div class="right"><span class="amt">' + amount + '</span>' + rightChip + margin + '</div></button></div>';
+}
+
+function renderPrestas(){
+  const all = D.P.slice().sort(byDateDesc);
+  let list = all.filter(p => filters.month === 'all' || monthKey(p.date) === filters.month);
+  if (filters.status !== 'all') list = list.filter(p => (D.pStatus[p.id] || {}).client === filters.status);
+  if (filters.type !== 'all') list = list.filter(p => p.typeId === filters.type);
+  if (filters.q) { const q = norm(filters.q); list = list.filter(p => norm(clientName(p.clientId) + ' ' + fournName(p.fournisseurId) + ' ' + (p.ref || '') + ' ' + (p.note || '')).includes(q)); }
+  const tot = r2(list.reduce((s, p) => s + p.total, 0)), marg = r2(list.reduce((s, p) => s + p.margin, 0)), open = r2(list.reduce((s, p) => s + ((D.pStatus[p.id] || {}).clientRem || 0), 0));
+  let h = '<div class="filters"><div class="monthnav"><button data-act="month-prev" aria-label="Mois précédent">‹</button><span>' + (filters.month === 'all' ? 'Toutes les dates' : esc(monthLabel(filters.month))) + '</span><button data-act="month-next" aria-label="Mois suivant">›</button></div>' +
+    '<button class="btn btn-sm' + (filters.month === 'all' ? ' btn-accent' : '') + '" data-act="month-all">' + (filters.month === 'all' ? 'Ce mois' : 'Tout') + '</button>' +
+    '<input class="search" id="presta-search" type="search" placeholder="Client, référence, contact…" value="' + esc(filters.q) + '" autocomplete="off"></div>';
+  h += '<div class="filters"><div class="chips">' + [['all', 'Toutes'], ['attente', 'En attente'], ['partiel', 'Partiel'], ['payee', 'Payées']].map(x => '<button data-act="set-filter" data-k="status" data-v="' + x[0] + '" class="' + (filters.status === x[0] ? 'on' : '') + '">' + x[1] + '</button>').join('') + '</div>' +
+    '<div class="chips">' + [['all', 'Tous docs']].concat(sortedTypes().map(t => [t.id, t.code])).map(x => '<button data-act="set-filter" data-k="type" data-v="' + x[0] + '" class="' + (filters.type === x[0] ? 'on' : '') + '">' + esc(x[1]) + '</button>').join('') + '</div></div>';
+  h += '<div class="totals"><span><b>' + plural(list.length, 'prestation') + '</b></span><span>vendu <b>' + eur(tot) + '</b></span><span>bénéf <b class="num">' + eur(marg) + '</b></span><span>reste dû <b>' + eur(open) + '</b></span></div>';
+  if (!list.length) return h + '<div class="empty" style="margin-top:12px"><b>Rien ici.</b>' + (all.length ? 'Change le mois ou les filtres.' : 'Appuie sur + pour enregistrer ta première prestation.') + '</div>';
+  let last = null;
+  list.forEach(p => {
+    if (p.date !== last) { if (last !== null) h += '</div>'; h += '<div class="day-h">' + esc(fmtDateLong(p.date)) + '</div><div class="list">'; last = p.date; }
+    h += prestaRow(p);
+  });
+  h += '</div>';
+  return h;
+}
+
+function renderClients(){
+  const q = norm(filters.cq);
+  const stats = id => D.clientStats[id] || { balance: 0, nOpen: 0, n: 0, last: null };
+  let cs = S.clients.slice();
+  if (q) cs = cs.filter(c => norm(c.name + ' ' + (c.phone || '') + ' ' + (c.note || '')).includes(q));
+  const clients = cs.filter(c => c.statut !== 'prospect').sort((a, b) => (stats(b.id).balance - stats(a.id).balance) || byName(a, b));
+  const prospects = cs.filter(c => c.statut === 'prospect').sort((a, b) => (a.relance || '9').localeCompare(b.relance || '9') || byName(a, b));
+  let h = '<div class="filters"><input class="search" id="client-search" type="search" placeholder="Rechercher un client…" value="' + esc(filters.cq) + '" autocomplete="off"><button class="btn btn-accent" data-act="new-client">+ Client</button></div>';
+  const row = c => {
+    const s = stats(c.id);
+    const bal = s.balance > 0.004 ? '<span class="amt neg">' + eur(s.balance) + '</span>' : (s.balance < -0.004 ? '<span class="amt pos">avance ' + eur(-s.balance) + '</span>' : '<span class="chip payee">À jour</span>');
+    const sub = c.statut === 'prospect' ? ((c.relance ? 'relance ' + fmtDate(c.relance) + ' · ' : '') + esc(c.note || c.phone || 'prospect')) : (s.n ? plural(s.n, 'presta') + (s.nOpen ? ' · ' + s.nOpen + ' en attente ' + ageHTML(s.oldest) : '') : esc(c.phone || 'aucune prestation'));
+    return '<div class="row"><button class="row-btn" data-act="open-client" data-id="' + c.id + '"><div class="main-col"><div class="t">' + esc(c.name) + (c.statut === 'prospect' ? ' <span class="chip prospect">Prospect</span>' : '') + '</div><div class="s">' + sub + '</div></div><div class="right">' + (c.statut === 'prospect' ? '' : bal) + '</div></button></div>';
+  };
+  h += '<div class="section"><div class="section-h"><h2>Clients</h2><span class="muted small">' + plural(clients.length, 'client') + '</span></div>';
+  h += clients.length ? '<div class="list">' + clients.map(row).join('') + '</div>' : '<div class="empty"><b>' + (q ? 'Aucun client ne correspond.' : 'Aucun client pour l’instant.') + '</b>' + (q ? '' : 'Ajoute un garage ou un particulier avec + Client.') + '</div>';
+  h += '</div>';
+  if (prospects.length || !q) {
+    h += '<div class="section"><div class="section-h"><h2>Prospects</h2><span class="muted small">' + plural(prospects.length, 'prospect') + '</span></div>';
+    h += prospects.length ? '<div class="list">' + prospects.map(row).join('') + '</div>' : '<div class="empty"><b>Aucun prospect.</b>Note ici les garages à démarcher, avec une date de relance.</div>';
+    h += '</div>';
+  }
+  return h;
+}
+
+function renderFournisseurs(){
+  const q = norm(filters.fq);
+  const stats = id => D.fournStats[id] || { balance: 0, nOpen: 0, n: 0, last: null };
+  let fs = S.fournisseurs.slice();
+  if (q) fs = fs.filter(f => norm(f.name + ' ' + (f.phone || '') + ' ' + (f.note || '')).includes(q));
+  fs.sort((a, b) => (stats(b.id).balance - stats(a.id).balance) || byName(a, b));
+  let h = '<div class="filters"><input class="search" id="fourn-search" type="search" placeholder="Rechercher un contact…" value="' + esc(filters.fq) + '" autocomplete="off"><button class="btn btn-accent" data-act="new-fourn">+ Contact</button></div>';
+  h += '<div class="section"><div class="section-h"><h2>Contacts fournisseurs</h2><span class="muted small">' + plural(fs.length, 'contact') + '</span></div>';
+  h += fs.length ? '<div class="list">' + fs.map(f => {
+    const s = stats(f.id);
+    const bal = s.balance > 0.004 ? '<span class="amt warn">' + eur(s.balance) + '</span>' : (s.balance < -0.004 ? '<span class="amt pos">avance ' + eur(-s.balance) + '</span>' : '<span class="chip payee">Réglé</span>');
+    const sub = s.n ? plural(s.n, 'document') + (s.nOpen ? ' · ' + s.nOpen + ' à régler ' + ageHTML(s.oldest) : '') : esc(f.phone || f.note || 'aucun document');
+    return '<div class="row"><button class="row-btn" data-act="open-fourn" data-id="' + f.id + '"><div class="main-col"><div class="t">' + esc(f.name) + '</div><div class="s">' + sub + '</div></div><div class="right">' + bal + '</div></button></div>';
+  }).join('') + '</div>' : '<div class="empty"><b>' + (q ? 'Aucun contact ne correspond.' : 'Aucun contact.') + '</b>' + (q ? '' : 'Ajoute les personnes qui te fournissent les documents.') + '</div>';
+  h += '</div>';
+  return h;
+}
+
+function renderClientDetail(id){
+  const c = D.clientById[id];
+  if (!c) return '<div class="detail-top"><button class="back" data-act="back">←</button><h1>Client introuvable</h1></div>';
+  const s = D.clientStats[id] || { balance: 0, due: 0, credit: 0, nOpen: 0, n: 0, totalSold: 0, totalPaid: 0, margin: 0 };
+  const ps = D.P.filter(p => p.clientId === id).sort(byDateDesc);
+  const pays = S.paiements.filter(x => x.clientId === id).sort(byDateDesc);
+  let h = '<div class="detail-top"><button class="back" data-act="back" aria-label="Retour">←</button><h1>' + esc(c.name) + '</h1><button class="btn btn-sm" data-act="edit-client" data-id="' + id + '">Modifier</button></div>';
+  const label = s.balance > 0.004 ? 'Il te doit' : (s.balance < -0.004 ? 'Avance (trop-perçu)' : 'À jour');
+  const cls = s.balance > 0.004 ? 'neg' : 'pos';
+  h += '<div class="balance-card"><div><div class="lbl-sm">' + label + '</div><div class="big ' + cls + '">' + eur(Math.abs(s.balance)) + '</div>' + (s.nOpen ? '<div class="small muted">' + plural(s.nOpen, 'presta') + ' en attente ' + ageHTML(s.oldest) + '</div>' : '') + '</div>' +
+    '<div class="actions"><button class="btn btn-pos" data-act="new-paiement" data-id="' + id + '">Encaisser</button><button class="btn btn-accent" data-act="new-presta" data-id="' + id + '">+ Prestation</button><button class="btn" data-act="recap" data-id="' + id + '">Récap</button></div></div>';
+  h += '<div class="kv">' + (c.phone ? '<span>Tél. <b>' + esc(c.phone) + '</b> <button class="btn btn-sm" data-act="copy" data-text="' + esc(c.phone) + '">Copier</button></span>' : '') +
+    (c.statut === 'prospect' ? '<span><span class="chip prospect">Prospect</span></span>' : '') + (c.relance ? '<span>Relance <b>' + fmtDateY(c.relance) + '</b></span>' : '') +
+    '<span>Total vendu <b>' + eur(s.totalSold) + '</b></span><span>Encaissé <b>' + eur(s.totalPaid) + '</b></span><span>Marge totale <b>' + eur(s.margin) + '</b></span>' + (c.note ? '<span>Note : <b>' + esc(c.note) + '</b></span>' : '') + '</div>';
+  h += '<div class="section"><div class="section-h"><h2>Ses tarifs</h2><span class="muted small">appuie pour modifier</span></div><div class="tarif-grid">' + sortedTypes().map(t => {
+    const v = c.prices && c.prices[t.id] != null ? num(c.prices[t.id]) : null;
+    return '<button class="tarif" data-act="set-tarif" data-id="' + id + '" data-type="' + t.id + '"><span class="badge">' + esc(t.code) + '</span><span class="v ' + (v == null ? 'def' : '') + '">' + eur(v == null ? num(t.sell) : v) + '</span></button>';
+  }).join('') + '</div></div>';
+  h += '<div class="section"><div class="section-h"><h2>Prestations</h2><span class="muted small">' + plural(ps.length, 'prestation') + '</span></div>';
+  h += ps.length ? '<div class="list">' + ps.map(p => prestaRow(p, { context: 'client' })).join('') + '</div>' : '<div class="empty"><b>Aucune prestation.</b></div>';
+  h += '</div>';
+  h += '<div class="section"><div class="section-h"><h2>Encaissements</h2><span class="muted small">' + eur(s.totalPaid) + '</span></div>';
+  h += pays.length ? '<div class="list">' + pays.map(x => '<div class="row"><button class="row-btn" data-act="edit-paiement" data-id="' + x.id + '"><span class="badge soft">' + fmtDate(x.date) + '</span><div class="main-col"><div class="t">' + esc(x.method || 'Paiement') + '</div><div class="s">' + esc(x.note || (x.prestationId ? 'lié à une prestation' : '')) + '</div></div><div class="right"><span class="amt pos">' + eur(x.amount) + '</span></div></button></div>').join('') + '</div>' : '<div class="empty"><b>Aucun encaissement.</b></div>';
+  h += '</div>';
+  if (!ps.length && !pays.length) h += '<div class="section"><button class="btn btn-danger btn-block" data-act="del-client" data-id="' + id + '">Supprimer ce client</button></div>';
+  return h;
+}
+
+function renderFournDetail(id){
+  const f = D.fournById[id];
+  if (!f) return '<div class="detail-top"><button class="back" data-act="back">←</button><h1>Contact introuvable</h1></div>';
+  const s = D.fournStats[id] || { balance: 0, nOpen: 0, n: 0, totalCost: 0, totalPaid: 0 };
+  const ps = D.P.filter(p => p.fournisseurId === id).sort(byDateDesc);
+  const regs = S.reglements.filter(x => x.fournisseurId === id).sort(byDateDesc);
+  let h = '<div class="detail-top"><button class="back" data-act="back" aria-label="Retour">←</button><h1>' + esc(f.name) + '</h1><button class="btn btn-sm" data-act="edit-fourn" data-id="' + id + '">Modifier</button></div>';
+  const label = s.balance > 0.004 ? 'Tu lui dois' : (s.balance < -0.004 ? 'Avance versée' : 'Réglé');
+  h += '<div class="balance-card"><div><div class="lbl-sm">' + label + '</div><div class="big ' + (s.balance > 0.004 ? 'warn' : 'pos') + '">' + eur(Math.abs(s.balance)) + '</div>' + (s.nOpen ? '<div class="small muted">' + plural(s.nOpen, 'document') + ' à régler ' + ageHTML(s.oldest) + '</div>' : '') + '</div>' +
+    '<div class="actions"><button class="btn btn-accent" data-act="new-reglement" data-id="' + id + '">Régler</button></div></div>';
+  h += '<div class="kv">' + (f.phone ? '<span>Tél. <b>' + esc(f.phone) + '</b> <button class="btn btn-sm" data-act="copy" data-text="' + esc(f.phone) + '">Copier</button></span>' : '') + '<span>Total acheté <b>' + eur(s.totalCost) + '</b></span><span>Réglé <b>' + eur(s.totalPaid) + '</b></span>' + (f.note ? '<span>Note : <b>' + esc(f.note) + '</b></span>' : '') + '</div>';
+  h += '<div class="section"><div class="section-h"><h2>Ses prix</h2><span class="muted small">appuie pour modifier</span></div><div class="tarif-grid">' + sortedTypes().map(t => {
+    const v = f.costs && f.costs[t.id] != null ? num(f.costs[t.id]) : null;
+    return '<button class="tarif" data-act="set-cout" data-id="' + id + '" data-type="' + t.id + '"><span class="badge">' + esc(t.code) + '</span><span class="v ' + (v == null ? 'def' : '') + '">' + eur(v == null ? num(t.cost) : v) + '</span></button>';
+  }).join('') + '</div></div>';
+  h += '<div class="section"><div class="section-h"><h2>Documents fournis</h2><span class="muted small">' + plural(ps.length, 'prestation') + '</span></div>';
+  h += ps.length ? '<div class="list">' + ps.map(p => prestaRow(p, { context: 'fourn' })).join('') + '</div>' : '<div class="empty"><b>Aucun document.</b></div>';
+  h += '</div>';
+  h += '<div class="section"><div class="section-h"><h2>Règlements</h2><span class="muted small">' + eur(s.totalPaid) + '</span></div>';
+  h += regs.length ? '<div class="list">' + regs.map(x => '<div class="row"><button class="row-btn" data-act="edit-reglement" data-id="' + x.id + '"><span class="badge soft">' + fmtDate(x.date) + '</span><div class="main-col"><div class="t">' + esc(x.method || 'Règlement') + '</div><div class="s">' + esc(x.note || (x.prestationId ? 'lié à une prestation' : '')) + '</div></div><div class="right"><span class="amt">' + eur(x.amount) + '</span></div></button></div>').join('') + '</div>' : '<div class="empty"><b>Aucun règlement.</b></div>';
+  h += '</div>';
+  if (!ps.length && !regs.length) h += '<div class="section"><button class="btn btn-danger btn-block" data-act="del-fourn" data-id="' + id + '">Supprimer ce contact</button></div>';
+  return h;
+}
+
+function renderPlus(){
+  const keys = Object.keys(D.months).sort().reverse();
+  let h = '<div class="plus-grid">';
+  h += '<div class="card"><div class="section-h"><h2>Types de documents</h2><button class="btn btn-sm" data-act="new-type">+ Type</button></div><div class="list">' + (sortedTypes().map(t =>
+    '<div class="row"><button class="row-btn" data-act="edit-type" data-id="' + t.id + '"><span class="badge">' + esc(t.code) + '</span><div class="main-col"><div class="t">' + esc(t.label || t.code) + '</div><div class="s">achat ' + eur(t.cost) + ' → vente ' + eur(t.sell) + ' · bénéf ' + eur(num(t.sell) - num(t.cost)) + '</div></div></button></div>').join('') || '<div class="empty">Aucun type. Ajoute CPI, EXA…</div>') + '</div><p class="small muted" style="margin:10px 0 0">Prix par défaut, utilisés quand un client ou un contact n’a pas de tarif personnalisé.</p></div>';
+  h += '<div class="card"><div class="section-h"><h2>Exporter</h2></div><p class="small muted" style="margin:0 0 10px">Fichiers CSV (s’ouvrent dans Excel ou Numbers), utiles pour ta déclaration de chiffre d’affaires.</p><div class="actions"><button class="btn" data-act="export" data-kind="prestations">Prestations</button><button class="btn" data-act="export" data-kind="encaissements">Encaissements</button><button class="btn" data-act="export" data-kind="reglements">Règlements</button></div>' +
+    '<div class="section-h" style="margin-top:18px"><h2>Sauvegarde</h2></div><p class="small muted" style="margin:0 0 10px">Une copie compl\u00e8te de ton carnet, \u00e0 garder dans tes fichiers. Restaurable sur n\u2019importe quel appareil.</p><div class="actions"><button class="btn" data-act="backup">T\u00e9l\u00e9charger une sauvegarde</button><button class="btn" data-act="restore">Restaurer</button></div>' +
+    '<div class="section-h" style="margin-top:18px"><h2>Réglages</h2></div><div class="field"><label for="set-cc">Indicatif pays pour WhatsApp</label><input id="set-cc" inputmode="numeric" value="' + esc(settings().cc || '33') + '" placeholder="33"><div class="hint">Un numéro en 06… devient +33 6…. Pour les DOM, saisis le numéro complet avec + (ex. +590 690…).</div></div>' +
+    '<p class="small muted" style="margin:0">' + (store && store.kind === 'db' ? 'Données enregistrées dans ton espace Claude, privé : seul ton compte peut les lire.' : (store && store.kind === 'supabase' ? 'Donn\u00e9es enregistr\u00e9es dans ta base Supabase, synchronis\u00e9es entre tes appareils.' : 'Mode local : donn\u00e9es enregistr\u00e9es dans ce navigateur. Pense \u00e0 la sauvegarde.')) + (isOwner ? ' Connecté en tant que propriétaire.' : '') + '</p>' +
+    (D.hasDemo ? '<div style="margin-top:12px"><button class="btn btn-danger" data-act="purge-demo">Supprimer les données d’exemple</button></div>' : '') + (window.CARNET_ACCOUNT ? '<div style="margin-top:12px" class="actions"><span class="small muted">Connect\u00e9 : ' + esc(window.CARNET_ACCOUNT) + '</span><button class="btn btn-sm" data-act="logout">Se d\u00e9connecter</button></div>' : '') + '</div>';
+  h += '<div class="card wide"><div class="section-h"><h2>Mois par mois</h2></div>' + (keys.length ? '<div class="tbl-wrap" style="border:0"><table><thead><tr><th>Mois</th><th>Prestas</th><th>Vendu</th><th>Achats</th><th>Bénéf</th><th>Encaissé</th><th>Réglé</th></tr></thead><tbody>' + keys.map(k => { const m = D.months[k]; return '<tr><td>' + esc(monthLabel(k)) + '</td><td>' + m.n + '</td><td>' + eur(m.sold) + '</td><td>' + eur(m.cost) + '</td><td class="pos">' + eur(m.margin) + '</td><td>' + eur(m.cashIn) + '</td><td>' + eur(m.cashOut) + '</td></tr>'; }).join('') + '</tbody></table></div><p class="small muted" style="margin:10px 0 0">Vendu / achats / bénéf suivent la date des prestations ; encaissé et réglé suivent la date des paiements.</p>' : '<div class="empty"><b>Pas encore de données.</b></div>') + '</div>';
+  h += '</div>';
+  return h;
+}
+// ---------- sheet, toast ----------
+function openSheet(title, body, footer, onMount){
+  const root = $('#sheet-root');
+  root.innerHTML = '<div class="sheet" role="dialog" aria-modal="true" aria-label="' + esc(title) + '"><div class="sheet-h"><h3>' + esc(title) + '</h3><button class="sheet-x" data-act="close-sheet" aria-label="Fermer">✕</button></div><div class="sheet-b"><div class="form-err" id="form-err"></div>' + body + '</div>' + (footer ? '<div class="sheet-f">' + footer + '</div>' : '') + '</div>';
+  root.hidden = false; sheetOpen = true; $('#fab').hidden = true;
+  document.body.style.overflow = 'hidden';
+  if (onMount) onMount(root);
+}
+function closeSheet(){
+  const root = $('#sheet-root'); root.hidden = true; root.innerHTML = ''; sheetOpen = false;
+  document.body.style.overflow = '';
+  $('#fab').hidden = false;
+}
+function formErr(msg){ const el = $('#form-err'); if (el) el.textContent = msg || ''; if (msg) toastShort(msg); }
+function toastShort(msg){ /* kept quiet: the inline error is enough */ }
+function toast(msg, action, ms){
+  const root = $('#toast-root');
+  const el = document.createElement('div'); el.className = 'toast';
+  el.innerHTML = '<span>' + esc(msg) + '</span>' + (action ? '<button class="btn btn-sm">' + esc(action.label) + '</button>' : '');
+  if (action) el.querySelector('button').addEventListener('click', () => { el.remove(); action.fn(); });
+  root.appendChild(el);
+  setTimeout(() => el.remove(), ms || (action ? 7000 : 2600));
+}
+function armDelete(btn, fn){
+  if (btn.classList.contains('armed')) { fn(); return; }
+  btn.classList.add('armed'); const old = btn.textContent; btn.textContent = 'Confirmer la suppression';
+  setTimeout(() => { if (btn.isConnected) { btn.classList.remove('armed'); btn.textContent = old; } }, 4000);
+}
+function selectHTML(id, items, value, opts){
+  opts = opts || {};
+  return '<select id="' + id + '">' + (opts.empty ? '<option value="">' + esc(opts.empty) + '</option>' : '') + items.map(x => '<option value="' + x.id + '"' + (x.id === value ? ' selected' : '') + '>' + esc(x.name) + '</option>').join('') + (opts.addNew ? '<option value="__new">+ ' + esc(opts.addNew) + '…</option>' : '') + '</select>';
+}
+function methodSelect(id, value){ return '<select id="' + id + '">' + METHODS.map(m => '<option' + (m === value ? ' selected' : '') + '>' + m + '</option>').join('') + '</select>'; }
+
+// ---------- prestation form ----------
+function openPrestaForm(opts){
+  opts = opts || {};
+  const edit = opts.id ? S.prestations.find(p => p.id === opts.id) : null;
+  const types = sortedTypes();
+  if (!types.length) { toast('Ajoute d’abord un type de document (onglet Plus).'); return; }
+  const lp = edit ? S.paiements.find(x => x.prestationId === edit.id) : null;
+  const lr = edit ? S.reglements.find(x => x.prestationId === edit.id) : null;
+  const st = {
+    typeId: edit ? edit.typeId : (types.some(t => t.id === pref.get('lastType')) ? pref.get('lastType') : types[0].id),
+    clientId: edit ? edit.clientId : (opts.clientId || ''),
+    fournisseurId: edit ? (edit.fournisseurId || '') : '',
+    sellTouched: !!edit, costTouched: !!edit
+  };
+  if (!types.some(t => t.id === st.typeId)) st.typeId = types[0].id;
+  if (!edit) { const lf = pref.get('lastFourn:' + st.typeId, ''); if (S.fournisseurs.some(f => f.id === lf)) st.fournisseurId = lf; }
+  const clients = S.clients.slice().sort(byName), fourns = S.fournisseurs.slice().sort(byName);
+  const body =
+    '<div class="field"><label>Document</label><div class="seg" id="pf-types">' + types.map(t => '<button type="button" data-type="' + t.id + '" class="' + (t.id === st.typeId ? 'on' : '') + '">' + esc(t.code) + '</button>').join('') + '</div></div>' +
+    '<div class="field"><label for="pf-client">Client</label>' + selectHTML('pf-client', clients, st.clientId, { empty: 'Choisir un client', addNew: 'Nouveau client' }) + '</div>' +
+    '<div id="pf-newclient" hidden><div class="grid2"><div class="field"><label for="pf-nc-name">Nom du client</label><input id="pf-nc-name" autocomplete="off"></div><div class="field"><label for="pf-nc-phone">Téléphone</label><input id="pf-nc-phone" inputmode="tel" autocomplete="off"></div></div></div>' +
+    '<div class="field"><label for="pf-fourn">Contact (qui fournit le document)</label>' + selectHTML('pf-fourn', fourns, st.fournisseurId, { empty: 'Aucun', addNew: 'Nouveau contact' }) + '</div>' +
+    '<div id="pf-newfourn" hidden><div class="grid2"><div class="field"><label for="pf-nf-name">Nom du contact</label><input id="pf-nf-name" autocomplete="off"></div><div class="field"><label for="pf-nf-phone">Téléphone</label><input id="pf-nf-phone" inputmode="tel" autocomplete="off"></div></div></div>' +
+    '<div class="grid2"><div class="field"><label for="pf-qty">Quantité</label><div class="stepper"><button type="button" data-step="-1" aria-label="Moins">−</button><input id="pf-qty" type="number" min="1" step="1" inputmode="numeric" value="' + (edit ? num(edit.qty) || 1 : 1) + '"><button type="button" data-step="1" aria-label="Plus">+</button></div></div>' +
+    '<div class="field"><label for="pf-date">Date</label><input id="pf-date" type="date" value="' + esc(edit ? edit.date : todayISO()) + '"></div></div>' +
+    '<div class="grid2"><div class="field"><label for="pf-sell">Prix de vente (unité)</label><input id="pf-sell" type="number" step="0.01" min="0" inputmode="decimal" value="' + (edit ? num(edit.sell) : '') + '"><div class="hint" id="pf-sell-hint"></div></div>' +
+    '<div class="field"><label for="pf-cost">Prix d’achat (unité)</label><input id="pf-cost" type="number" step="0.01" min="0" inputmode="decimal" value="' + (edit ? num(edit.cost) : '') + '"><div class="hint" id="pf-cost-hint"></div></div></div>' +
+    '<div class="summary" id="pf-sum"></div>' +
+    '<div class="field"><label for="pf-ref">Référence (immat, n° dossier…)</label><input id="pf-ref" value="' + esc(edit ? edit.ref : '') + '" autocomplete="off"></div>' +
+    '<label class="switch" for="pf-paid"><span>Le client a déjà payé</span><input type="checkbox" id="pf-paid"' + (lp ? ' checked' : '') + '></label>' +
+    '<div class="field" id="pf-method-wrap"' + (lp ? '' : ' hidden') + '><label for="pf-method">Mode de paiement</label>' + methodSelect('pf-method', lp ? lp.method : pref.get('lastMethod', 'Espèces')) + '</div>' +
+    '<label class="switch" for="pf-settled" id="pf-settled-wrap"><span>Contact déjà réglé</span><input type="checkbox" id="pf-settled"' + (lr ? ' checked' : '') + '></label>' +
+    '<div class="field"><label for="pf-note">Note</label><input id="pf-note" value="' + esc(edit ? edit.note : '') + '" autocomplete="off"></div>';
+  const footer = edit
+    ? '<button class="btn btn-danger" id="pf-del">Supprimer</button><button class="btn btn-accent" id="pf-save">Enregistrer</button>'
+    : '<button class="btn" id="pf-save-new">Enregistrer + nouvelle</button><button class="btn btn-accent" id="pf-save">Enregistrer</button>';
+  openSheet(edit ? 'Modifier la prestation' : 'Nouvelle prestation', body, footer, root => {
+    const q = s => root.querySelector(s);
+    const refresh = () => {
+      const t = D.typeById[st.typeId]; const c = D.clientById[q('#pf-client').value]; const f = D.fournById[q('#pf-fourn').value];
+      const cp = c && c.prices && c.prices[st.typeId] != null ? num(c.prices[st.typeId]) : null;
+      const fc = f && f.costs && f.costs[st.typeId] != null ? num(f.costs[st.typeId]) : null;
+      const sellDef = cp != null ? cp : (t ? num(t.sell) : 0), costDef = fc != null ? fc : (t ? num(t.cost) : 0);
+      if (!st.sellTouched) q('#pf-sell').value = sellDef;
+      if (!st.costTouched) q('#pf-cost').value = costDef;
+      q('#pf-sell-hint').textContent = c ? (cp != null ? 'Tarif de ' + c.name + ' : ' + eur(cp) : 'Tarif par défaut ' + (t ? t.code : '') + ' : ' + eur(sellDef) + ' (pas de tarif perso)') : (t ? 'Par défaut : ' + eur(sellDef) : '');
+      q('#pf-cost-hint').textContent = f ? (fc != null ? 'Prix de ' + f.name + ' : ' + eur(fc) : 'Prix par défaut : ' + eur(costDef)) : (t ? 'Par défaut : ' + eur(costDef) : '');
+      const qty = Math.max(1, parseInt(q('#pf-qty').value, 10) || 1), sell = num(q('#pf-sell').value), cost = num(q('#pf-cost').value);
+      const tot = r2(qty * sell), ct = r2(qty * cost), mg = r2(tot - ct);
+      q('#pf-sum').innerHTML = '<span>Le client doit<b>' + eur(tot) + '</b></span><span>Coût contact<b>' + eur(ct) + '</b></span><span class="' + (mg >= 0 ? 'pos' : 'neg') + '">Ton bénéf<b>' + eur(mg) + '</b></span>';
+      q('#pf-settled-wrap').hidden = !q('#pf-fourn').value;
+      q('#pf-method-wrap').hidden = !q('#pf-paid').checked;
+      q('#pf-newclient').hidden = q('#pf-client').value !== '__new';
+      q('#pf-newfourn').hidden = q('#pf-fourn').value !== '__new';
+    };
+    q('#pf-types').addEventListener('click', e => { const b = e.target.closest('button[data-type]'); if (!b) return; st.typeId = b.dataset.type; $$('button', q('#pf-types')).forEach(x => x.classList.toggle('on', x === b)); st.sellTouched = false; st.costTouched = false; if (!edit) { const lf = pref.get('lastFourn:' + st.typeId, ''); if (S.fournisseurs.some(f => f.id === lf)) q('#pf-fourn').value = lf; } refresh(); });
+    q('#pf-client').addEventListener('change', () => { st.sellTouched = false; refresh(); if (q('#pf-client').value === '__new') q('#pf-nc-name').focus(); });
+    q('#pf-fourn').addEventListener('change', () => { st.costTouched = false; refresh(); if (q('#pf-fourn').value === '__new') q('#pf-nf-name').focus(); });
+    q('#pf-sell').addEventListener('input', () => { st.sellTouched = true; refresh(); });
+    q('#pf-cost').addEventListener('input', () => { st.costTouched = true; refresh(); });
+    q('#pf-qty').addEventListener('input', refresh);
+    q('#pf-paid').addEventListener('change', refresh);
+    $$('.stepper button', root).forEach(b => b.addEventListener('click', () => { const i = q('#pf-qty'); i.value = Math.max(1, (parseInt(i.value, 10) || 1) + Number(b.dataset.step)); refresh(); }));
+    refresh();
+    const save = async andNew => {
+      let clientId = q('#pf-client').value, fId = q('#pf-fourn').value;
+      if (clientId === '__new') { const name = q('#pf-nc-name').value.trim(); if (!name) { formErr('Donne un nom au nouveau client.'); return; } clientId = uid(); if (!await write('clients', clientId, { name: name, phone: q('#pf-nc-phone').value.trim(), statut: 'client', prices: {}, note: '', createdAt: nowISO() })) return; }
+      if (!clientId) { formErr('Choisis un client.'); return; }
+      if (fId === '__new') { const name = q('#pf-nf-name').value.trim(); if (!name) { formErr('Donne un nom au nouveau contact.'); return; } fId = uid(); if (!await write('fournisseurs', fId, { name: name, phone: q('#pf-nf-phone').value.trim(), costs: {}, note: '', createdAt: nowISO() })) return; }
+      const qty = Math.max(1, parseInt(q('#pf-qty').value, 10) || 1), sell = r2(num(q('#pf-sell').value)), cost = r2(num(q('#pf-cost').value));
+      const date = q('#pf-date').value || todayISO();
+      const id = edit ? edit.id : uid();
+      const doc = { typeId: st.typeId, clientId: clientId, fournisseurId: fId || null, qty: qty, sell: sell, cost: cost, date: date, ref: q('#pf-ref').value.trim(), note: q('#pf-note').value.trim(), createdAt: edit ? (edit.createdAt || nowISO()) : nowISO() };
+      if (!await write('prestations', id, doc)) return;
+      const total = r2(qty * sell), costTotal = r2(qty * cost), method = q('#pf-method').value;
+      if (q('#pf-paid').checked) {
+        const pd = { clientId: clientId, amount: total, date: date, method: method, note: 'Payé à la remise', prestationId: id, createdAt: lp ? lp.createdAt : nowISO() };
+        if (!lp || lp.amount !== total || lp.date !== date || lp.method !== method || lp.clientId !== clientId) await write('paiements', lp ? lp.id : uid(), pd);
+      } else if (lp) await remove('paiements', lp.id);
+      if (fId && q('#pf-settled').checked) {
+        const rd = { fournisseurId: fId, amount: costTotal, date: date, method: 'Espèces', note: 'Réglé à la remise', prestationId: id, createdAt: lr ? lr.createdAt : nowISO() };
+        if (!lr || lr.amount !== costTotal || lr.date !== date || lr.fournisseurId !== fId) await write('reglements', lr ? lr.id : uid(), rd);
+      } else if (lr) await remove('reglements', lr.id);
+      pref.set('lastType', st.typeId); if (fId) pref.set('lastFourn:' + st.typeId, fId); pref.set('lastMethod', method);
+      closeSheet(); toast(edit ? 'Prestation modifiée' : 'Prestation enregistrée');
+      const c = D.clientById[clientId], t = D.typeById[st.typeId];
+      if (c && t) { const cur = c.prices && c.prices[st.typeId] != null ? num(c.prices[st.typeId]) : null; const ref = cur != null ? cur : num(t.sell);
+        if (ref !== sell) setTimeout(() => toast('Mémoriser ' + eur(sell) + ' comme tarif ' + t.code + ' pour ' + c.name + ' ?', { label: 'Oui', fn: () => saveTarif(clientId, st.typeId, sell) }), 300); }
+      if (andNew) setTimeout(() => openPrestaForm({ clientId: clientId }), 50);
+    };
+    q('#pf-save').addEventListener('click', () => save(false));
+    if (q('#pf-save-new')) q('#pf-save-new').addEventListener('click', () => save(true));
+    if (q('#pf-del')) q('#pf-del').addEventListener('click', () => armDelete(q('#pf-del'), async () => {
+      if (!await remove('prestations', edit.id)) return;
+      if (lp) await remove('paiements', lp.id); if (lr) await remove('reglements', lr.id);
+      closeSheet(); toast('Prestation supprimée');
+    }));
+    if (!edit && !st.clientId) q('#pf-client').focus();
+  });
+}
+async function saveTarif(clientId, typeId, value){
+  const c = S.clients.find(x => x.id === clientId); if (!c) return;
+  const prices = Object.assign({}, c.prices || {}); if (value == null || value === '') delete prices[typeId]; else prices[typeId] = r2(value);
+  if (await write('clients', clientId, Object.assign(stripId(c), { prices: prices }))) toast('Tarif mémorisé');
+}
+async function saveCout(fId, typeId, value){
+  const f = S.fournisseurs.find(x => x.id === fId); if (!f) return;
+  const costs = Object.assign({}, f.costs || {}); if (value == null || value === '') delete costs[typeId]; else costs[typeId] = r2(value);
+  if (await write('fournisseurs', fId, Object.assign(stripId(f), { costs: costs }))) toast('Prix mémorisé');
+}
+function openTarifForm(kind, id, typeId){
+  const t = D.typeById[typeId]; const who = kind === 'client' ? D.clientById[id] : D.fournById[id]; if (!t || !who) return;
+  const cur = kind === 'client' ? (who.prices || {})[typeId] : (who.costs || {})[typeId];
+  const def = kind === 'client' ? num(t.sell) : num(t.cost);
+  openSheet((kind === 'client' ? 'Tarif ' : 'Prix ') + t.code + ' · ' + who.name,
+    '<div class="field"><label for="tf-val">' + (kind === 'client' ? 'Prix de vente à ce client' : 'Prix d’achat chez ce contact') + '</label><input id="tf-val" type="number" step="0.01" min="0" inputmode="decimal" value="' + (cur != null ? num(cur) : '') + '" placeholder="' + def + '"><div class="hint">Vide = prix par défaut (' + eur(def) + ').</div></div>',
+    '<button class="btn" id="tf-reset">Remettre par défaut</button><button class="btn btn-accent" id="tf-save">Enregistrer</button>',
+    root => { const go = v => { closeSheet(); kind === 'client' ? saveTarif(id, typeId, v) : saveCout(id, typeId, v); };
+      root.querySelector('#tf-save').addEventListener('click', () => { const v = root.querySelector('#tf-val').value; go(v === '' ? null : num(v)); });
+      root.querySelector('#tf-reset').addEventListener('click', () => go(null));
+      root.querySelector('#tf-val').focus(); });
+}
+
+// ---------- paiement / règlement ----------
+function openPaiementForm(opts){
+  opts = opts || {};
+  const edit = opts.id ? S.paiements.find(x => x.id === opts.id) : null;
+  const clientId = edit ? edit.clientId : (opts.clientId || '');
+  const clients = S.clients.slice().sort(byName);
+  const balanceOf = cid => { const s = D.clientStats[cid]; return s ? s.balance : 0; };
+  const initAmt = edit ? num(edit.amount) : Math.max(0, balanceOf(clientId));
+  openSheet(edit ? 'Modifier l’encaissement' : 'Encaisser un paiement',
+    '<div class="field"><label for="pay-client">Client</label>' + selectHTML('pay-client', clients, clientId, { empty: 'Choisir un client' }) + '</div>' +
+    '<div class="grid2"><div class="field"><label for="pay-amt">Montant reçu</label><input id="pay-amt" type="number" step="0.01" min="0" inputmode="decimal" value="' + (initAmt || '') + '"><div class="hint" id="pay-hint"></div></div>' +
+    '<div class="field"><label for="pay-date">Date</label><input id="pay-date" type="date" value="' + esc(edit ? edit.date : todayISO()) + '"></div></div>' +
+    '<div class="field"><label for="pay-method">Mode</label>' + methodSelect('pay-method', edit ? edit.method : pref.get('lastMethod', 'Espèces')) + '</div>' +
+    '<div class="field"><label for="pay-note">Note</label><input id="pay-note" value="' + esc(edit ? edit.note : '') + '" autocomplete="off"></div>' +
+    (edit && edit.prestationId ? '<p class="small muted">Cet encaissement est lié à une prestation (« client a déjà payé »).</p>' : ''),
+    (edit ? '<button class="btn btn-danger" id="pay-del">Supprimer</button>' : '') + '<button class="btn btn-pos" id="pay-save">' + (edit ? 'Enregistrer' : 'Encaisser') + '</button>',
+    root => {
+      const q = s => root.querySelector(s);
+      const refresh = () => { const cid = q('#pay-client').value; const bal = balanceOf(cid) + (edit && edit.clientId === cid ? num(edit.amount) : 0); const a = num(q('#pay-amt').value); const rest = r2(bal - a);
+        q('#pay-hint').textContent = cid ? (bal > 0.004 ? 'Dû actuellement : ' + eur(bal) + (a ? ' · reste après : ' + eur(rest) : '') : 'Ce client est à jour' + (a ? ' · avance de ' + eur(-rest) : '')) : ''; };
+      q('#pay-client').addEventListener('change', () => { if (!edit) q('#pay-amt').value = Math.max(0, balanceOf(q('#pay-client').value)) || ''; refresh(); });
+      q('#pay-amt').addEventListener('input', refresh); refresh();
+      q('#pay-save').addEventListener('click', async () => {
+        const cid = q('#pay-client').value, a = r2(num(q('#pay-amt').value));
+        if (!cid) { formErr('Choisis un client.'); return; } if (a <= 0) { formErr('Indique le montant reçu.'); return; }
+        const doc = { clientId: cid, amount: a, date: q('#pay-date').value || todayISO(), method: q('#pay-method').value, note: q('#pay-note').value.trim(), prestationId: edit ? (edit.prestationId || null) : null, createdAt: edit ? (edit.createdAt || nowISO()) : nowISO() };
+        pref.set('lastMethod', doc.method);
+        if (await write('paiements', edit ? edit.id : uid(), doc)) { closeSheet(); toast(eur(a) + ' encaissé'); }
+      });
+      if (q('#pay-del')) q('#pay-del').addEventListener('click', () => armDelete(q('#pay-del'), async () => { if (await remove('paiements', edit.id)) { closeSheet(); toast('Encaissement supprimé'); } }));
+      if (!edit) q('#pay-amt').focus();
+    });
+}
+function openReglementForm(opts){
+  opts = opts || {};
+  const edit = opts.id ? S.reglements.find(x => x.id === opts.id) : null;
+  const fId = edit ? edit.fournisseurId : (opts.fournisseurId || '');
+  const fourns = S.fournisseurs.slice().sort(byName);
+  const balanceOf = id => { const s = D.fournStats[id]; return s ? s.balance : 0; };
+  const initAmt = edit ? num(edit.amount) : Math.max(0, balanceOf(fId));
+  openSheet(edit ? 'Modifier le règlement' : 'Régler un contact',
+    '<div class="field"><label for="reg-fourn">Contact</label>' + selectHTML('reg-fourn', fourns, fId, { empty: 'Choisir un contact' }) + '</div>' +
+    '<div class="grid2"><div class="field"><label for="reg-amt">Montant versé</label><input id="reg-amt" type="number" step="0.01" min="0" inputmode="decimal" value="' + (initAmt || '') + '"><div class="hint" id="reg-hint"></div></div>' +
+    '<div class="field"><label for="reg-date">Date</label><input id="reg-date" type="date" value="' + esc(edit ? edit.date : todayISO()) + '"></div></div>' +
+    '<div class="field"><label for="reg-method">Mode</label>' + methodSelect('reg-method', edit ? edit.method : pref.get('lastMethod', 'Espèces')) + '</div>' +
+    '<div class="field"><label for="reg-note">Note</label><input id="reg-note" value="' + esc(edit ? edit.note : '') + '" autocomplete="off"></div>',
+    (edit ? '<button class="btn btn-danger" id="reg-del">Supprimer</button>' : '') + '<button class="btn btn-accent" id="reg-save">' + (edit ? 'Enregistrer' : 'Régler') + '</button>',
+    root => {
+      const q = s => root.querySelector(s);
+      const refresh = () => { const id = q('#reg-fourn').value; const bal = balanceOf(id) + (edit && edit.fournisseurId === id ? num(edit.amount) : 0); const a = num(q('#reg-amt').value);
+        q('#reg-hint').textContent = id ? (bal > 0.004 ? 'Tu lui dois : ' + eur(bal) + (a ? ' · reste après : ' + eur(r2(bal - a)) : '') : 'Contact réglé') : ''; };
+      q('#reg-fourn').addEventListener('change', () => { if (!edit) q('#reg-amt').value = Math.max(0, balanceOf(q('#reg-fourn').value)) || ''; refresh(); });
+      q('#reg-amt').addEventListener('input', refresh); refresh();
+      q('#reg-save').addEventListener('click', async () => {
+        const id = q('#reg-fourn').value, a = r2(num(q('#reg-amt').value));
+        if (!id) { formErr('Choisis un contact.'); return; } if (a <= 0) { formErr('Indique le montant versé.'); return; }
+        const doc = { fournisseurId: id, amount: a, date: q('#reg-date').value || todayISO(), method: q('#reg-method').value, note: q('#reg-note').value.trim(), prestationId: edit ? (edit.prestationId || null) : null, createdAt: edit ? (edit.createdAt || nowISO()) : nowISO() };
+        if (await write('reglements', edit ? edit.id : uid(), doc)) { closeSheet(); toast(eur(a) + ' réglé'); }
+      });
+      if (q('#reg-del')) q('#reg-del').addEventListener('click', () => armDelete(q('#reg-del'), async () => { if (await remove('reglements', edit.id)) { closeSheet(); toast('Règlement supprimé'); } }));
+      if (!edit) q('#reg-amt').focus();
+    });
+}
+
+// ---------- client / contact / type forms ----------
+function tarifInputs(prefix, obj, key, lbl){
+  return '<div class="section-h" style="margin-top:4px"><h2 style="font-size:16px">' + lbl + '</h2><span class="muted small">vide = par défaut</span></div><div class="tarifs">' + sortedTypes().map(t => { const v = obj && obj[key] && obj[key][t.id] != null ? num(obj[key][t.id]) : ''; const def = key === 'prices' ? num(t.sell) : num(t.cost);
+    return '<div class="field"><label for="' + prefix + '-' + t.id + '">' + esc(t.code) + '</label><input id="' + prefix + '-' + t.id + '" data-type="' + t.id + '" type="number" step="0.01" min="0" inputmode="decimal" value="' + v + '" placeholder="' + def + '"></div>'; }).join('') + '</div>';
+}
+function readTarifs(root, prefix){ const o = {}; $$('input[id^="' + prefix + '-"]', root).forEach(i => { if (i.value !== '') o[i.dataset.type] = r2(num(i.value)); }); return o; }
+function openClientForm(opts){
+  opts = opts || {};
+  const edit = opts.id ? S.clients.find(x => x.id === opts.id) : null;
+  openSheet(edit ? 'Modifier le client' : 'Nouveau client',
+    '<div class="field"><label for="cf-name">Nom (garage, société, personne)</label><input id="cf-name" value="' + esc(edit ? edit.name : '') + '" autocomplete="off"></div>' +
+    '<div class="grid2"><div class="field"><label for="cf-phone">Téléphone</label><input id="cf-phone" inputmode="tel" value="' + esc(edit ? edit.phone : '') + '" autocomplete="off"></div>' +
+    '<div class="field"><label for="cf-statut">Statut</label><select id="cf-statut"><option value="client"' + (!edit || edit.statut !== 'prospect' ? ' selected' : '') + '>Client</option><option value="prospect"' + (edit && edit.statut === 'prospect' ? ' selected' : '') + '>Prospect</option></select></div></div>' +
+    '<div class="grid2"><div class="field"><label for="cf-relance">À relancer le</label><input id="cf-relance" type="date" value="' + esc(edit ? edit.relance || '' : (opts.prospect ? todayISO() : '')) + '"><div class="hint">Apparaît sur l’accueil le jour venu.</div></div></div>' +
+    '<div class="field"><label for="cf-note">Note (adresse, horaires, contact sur place…)</label><input id="cf-note" value="' + esc(edit ? edit.note : '') + '" autocomplete="off"></div>' +
+    tarifInputs('cf-t', edit, 'prices', 'Ses tarifs de vente'),
+    '<button class="btn btn-accent" id="cf-save">Enregistrer</button>',
+    root => {
+      const q = s => root.querySelector(s);
+      if (opts.prospect) q('#cf-statut').value = 'prospect';
+      q('#cf-save').addEventListener('click', async () => {
+        const name = q('#cf-name').value.trim(); if (!name) { formErr('Le nom est obligatoire.'); return; }
+        const doc = Object.assign(edit ? stripId(edit) : { createdAt: nowISO() }, { name: name, phone: q('#cf-phone').value.trim(), statut: q('#cf-statut').value, relance: q('#cf-relance').value || null, note: q('#cf-note').value.trim(), prices: readTarifs(root, 'cf-t') });
+        if (edit && edit.demo) delete doc.demo;
+        const id = edit ? edit.id : uid();
+        if (await write('clients', id, doc)) { closeSheet(); toast(edit ? 'Client modifié' : 'Client ajouté'); if (!edit) { nav.detail = { kind: 'client', id: id }; render(); } }
+      });
+      q('#cf-name').focus();
+    });
+}
+function openFournForm(opts){
+  opts = opts || {};
+  const edit = opts.id ? S.fournisseurs.find(x => x.id === opts.id) : null;
+  openSheet(edit ? 'Modifier le contact' : 'Nouveau contact',
+    '<div class="field"><label for="ff-name">Nom</label><input id="ff-name" value="' + esc(edit ? edit.name : '') + '" autocomplete="off"></div>' +
+    '<div class="field"><label for="ff-phone">Téléphone</label><input id="ff-phone" inputmode="tel" value="' + esc(edit ? edit.phone : '') + '" autocomplete="off"></div>' +
+    '<div class="field"><label for="ff-note">Note</label><input id="ff-note" value="' + esc(edit ? edit.note : '') + '" autocomplete="off"></div>' +
+    tarifInputs('ff-t', edit, 'costs', 'Ses prix d’achat'),
+    '<button class="btn btn-accent" id="ff-save">Enregistrer</button>',
+    root => {
+      const q = s => root.querySelector(s);
+      q('#ff-save').addEventListener('click', async () => {
+        const name = q('#ff-name').value.trim(); if (!name) { formErr('Le nom est obligatoire.'); return; }
+        const doc = Object.assign(edit ? stripId(edit) : { createdAt: nowISO() }, { name: name, phone: q('#ff-phone').value.trim(), note: q('#ff-note').value.trim(), costs: readTarifs(root, 'ff-t') });
+        if (edit && edit.demo) delete doc.demo;
+        const id = edit ? edit.id : uid();
+        if (await write('fournisseurs', id, doc)) { closeSheet(); toast(edit ? 'Contact modifié' : 'Contact ajouté'); if (!edit) { nav.detail = { kind: 'fourn', id: id }; render(); } }
+      });
+      q('#ff-name').focus();
+    });
+}
+function openTypeForm(opts){
+  opts = opts || {};
+  const edit = opts.id ? S.types.find(x => x.id === opts.id) : null;
+  const used = edit ? S.prestations.some(p => p.typeId === edit.id) : false;
+  openSheet(edit ? 'Modifier le type' : 'Nouveau type de document',
+    '<div class="grid2"><div class="field"><label for="tf-code">Code court</label><input id="tf-code" value="' + esc(edit ? edit.code : '') + '" placeholder="CPI" maxlength="8" autocomplete="off" style="text-transform:uppercase"></div>' +
+    '<div class="field"><label for="tf-order">Ordre</label><input id="tf-order" type="number" inputmode="numeric" value="' + (edit ? num(edit.order) : S.types.length + 1) + '"></div></div>' +
+    '<div class="field"><label for="tf-label">Libellé</label><input id="tf-label" value="' + esc(edit ? edit.label : '') + '" placeholder="Certificat provisoire d’immatriculation" autocomplete="off"></div>' +
+    '<div class="grid2"><div class="field"><label for="tf-cost">Prix d’achat par défaut</label><input id="tf-cost" type="number" step="0.01" min="0" inputmode="decimal" value="' + (edit ? num(edit.cost) : '') + '"></div>' +
+    '<div class="field"><label for="tf-sell">Prix de vente par défaut</label><input id="tf-sell" type="number" step="0.01" min="0" inputmode="decimal" value="' + (edit ? num(edit.sell) : '') + '"></div></div>',
+    (edit && !used ? '<button class="btn btn-danger" id="tf-del">Supprimer</button>' : '') + '<button class="btn btn-accent" id="tf-save">Enregistrer</button>',
+    root => {
+      const q = s => root.querySelector(s);
+      q('#tf-save').addEventListener('click', async () => {
+        const code = q('#tf-code').value.trim().toUpperCase(); if (!code) { formErr('Le code court est obligatoire (ex. CPI).'); return; }
+        const doc = { code: code, label: q('#tf-label').value.trim(), sell: r2(num(q('#tf-sell').value)), cost: r2(num(q('#tf-cost').value)), order: num(q('#tf-order').value) };
+        if (await write('types', edit ? edit.id : uid(), doc)) { closeSheet(); toast(edit ? 'Type modifié' : 'Type ajouté'); }
+      });
+      if (q('#tf-del')) q('#tf-del').addEventListener('click', () => armDelete(q('#tf-del'), async () => { if (await remove('types', edit.id)) { closeSheet(); toast('Type supprimé'); } }));
+      q('#tf-code').focus();
+    });
+}
+
+// ---------- récap WhatsApp ----------
+function waNumber(phone){
+  let p = String(phone || '').replace(/[\s.\-()]/g, '');
+  if (!p) return '';
+  if (p.startsWith('+')) return p.slice(1);
+  if (p.startsWith('00')) return p.slice(2);
+  if (p.startsWith('0')) return String(settings().cc || '33').replace(/\D/g, '') + p.slice(1);
+  return p;
+}
+function recapText(clientId, detail){
+  const c = D.clientById[clientId]; const s = D.clientStats[clientId] || { balance: 0, credit: 0 };
+  const open = D.P.filter(p => p.clientId === clientId && (D.pStatus[p.id] || {}).clientRem > 0.004).sort(byDateAsc);
+  const lines = ['Récap ' + c.name, ''];
+  if (!open.length) { lines.push('Tout est réglé, merci !'); return lines.join('\n'); }
+  const byType = {}; open.forEach(p => { const k = typeCode(p.typeId); const b = byType[k] = byType[k] || { n: 0, tot: 0 }; b.n += p.qty; b.tot = r2(b.tot + p.total); });
+  if (detail) open.forEach(p => lines.push('• ' + fmtDate(p.date) + ' ' + typeCode(p.typeId) + (p.ref ? ' ' + p.ref : '') + (p.qty > 1 ? ' ×' + p.qty : '') + ' : ' + eur(p.total)));
+  else Object.keys(byType).forEach(k => lines.push('• ' + byType[k].n + ' × ' + k + ' : ' + eur(byType[k].tot)));
+  const total = r2(open.reduce((a, p) => a + p.total, 0)); const paid = r2(total - s.balance);
+  lines.push('', 'Total : ' + eur(total));
+  if (paid > 0.004) lines.push('Déjà réglé : ' + eur(paid));
+  lines.push('Reste à régler : ' + eur(Math.max(0, s.balance)));
+  return lines.join('\n');
+}
+function openRecap(clientId){
+  const c = D.clientById[clientId]; if (!c) return;
+  let detail = pref.get('recapDetail', true);
+  const wa = waNumber(c.phone);
+  openSheet('Récap pour ' + c.name,
+    '<label class="switch" for="rc-detail"><span>Détailler chaque document</span><input type="checkbox" id="rc-detail"' + (detail ? ' checked' : '') + '></label>' +
+    '<div class="field"><label for="rc-text">Message (modifiable)</label><textarea id="rc-text" class="copybox">' + esc(recapText(clientId, detail)) + '</textarea></div>',
+    '<button class="btn" id="rc-copy">Copier le texte</button>' + (wa ? '<a class="btn btn-pos" id="rc-wa" href="https://wa.me/' + esc(wa) + '?text=' + encodeURIComponent(recapText(clientId, detail)) + '" target="_blank" rel="noopener">Ouvrir WhatsApp</a>' : ''),
+    root => {
+      const q = s => root.querySelector(s);
+      const sync = () => { if (q('#rc-wa')) q('#rc-wa').href = 'https://wa.me/' + wa + '?text=' + encodeURIComponent(q('#rc-text').value); };
+      q('#rc-detail').addEventListener('change', () => { detail = q('#rc-detail').checked; pref.set('recapDetail', detail); q('#rc-text').value = recapText(clientId, detail); sync(); });
+      q('#rc-text').addEventListener('input', sync);
+      q('#rc-copy').addEventListener('click', () => copyText(q('#rc-text').value, q('#rc-text')));
+    });
+}
+function copyText(text, el){
+  const done = () => toast('Copié');
+  const fallback = () => { try { if (el) { el.focus(); el.select(); } else { const ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select(); document.execCommand && document.execCommand('copy'); ta.remove(); } toast('Texte sélectionné : copie-le avec Copier.'); } catch (e) { toast('Copie impossible ici.'); } };
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, fallback); else fallback();
+}
+
+// ---------- export, démo ----------
+function csvCell(v){ let s = String(v == null ? '' : v); if (typeof v === 'number') s = String(v).replace('.', ','); if (/[;"\n\r]/.test(s)) s = '"' + s.replace(/"/g, '""') + '"'; return s; }
+function buildCSV(kind){
+  let rows;
+  if (kind === 'prestations') rows = [['Date', 'Document', 'Client', 'Contact', 'Quantité', 'Prix vente', 'Total client', 'Prix achat', 'Coût', 'Bénéfice', 'Statut client', 'Référence', 'Note']].concat(D.P.slice().sort(byDateAsc).map(p => [p.date, typeCode(p.typeId), clientName(p.clientId), fournName(p.fournisseurId), p.qty, p.sell, p.total, p.cost, p.costTotal, p.margin, STATUS_LBL[(D.pStatus[p.id] || {}).client] || '', p.ref || '', p.note || '']));
+  else if (kind === 'encaissements') rows = [['Date', 'Client', 'Montant', 'Mode', 'Note']].concat(S.paiements.slice().sort(byDateAsc).map(x => [x.date, clientName(x.clientId), num(x.amount), x.method || '', x.note || '']));
+  else rows = [['Date', 'Contact', 'Montant', 'Mode', 'Note']].concat(S.reglements.slice().sort(byDateAsc).map(x => [x.date, fournName(x.fournisseurId), num(x.amount), x.method || '', x.note || '']));
+  return '﻿' + rows.map(r => r.map(csvCell).join(';')).join('\r\n');
+}
+async function exportCSV(kind){
+  const csv = buildCSV(kind); const filename = 'carnet-' + kind + '-' + todayISO() + '.csv';
+  await deliverFile(filename, csv, 'text/csv;charset=utf-8', 'Export ' + kind);
+}
+async function purgeDemo(){
+  let n = 0;
+  for (const c of COLLS) for (const d of S[c].slice()) if (d.demo) { if (await remove(c, d.id)) n++; }
+  toast(n ? 'Exemples supprimés : le carnet est à toi.' : 'Aucun exemple à supprimer.');
+}
+
+// ---------- sauvegarde JSON / restauration ----------
+function downloadBlob(filename, text, mime){
+  try {
+    const blob = new Blob([text], { type: mime || 'application/octet-stream' });
+    const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = filename; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 4000); return true;
+  } catch (e) { console.error(e); return false; }
+}
+const inClaudeViewer = () => !!(window.claude && typeof window.claude.use === 'function');
+async function deliverFile(filename, text, mime, label){
+  if (dlCap) { try { await dlCap.save({ filename: filename, data: text }); toast('Fichier enregistré'); return; } catch (e) { if (e && e.code === 'declined') return; console.error(e); } }
+  if (!inClaudeViewer() && downloadBlob(filename, text, mime)) { toast('Fichier téléchargé'); return; }
+  openSheet(label || 'Export', '<p class="small muted">L’enregistrement direct n’est pas disponible ici : copie le contenu et colle-le dans un fichier nommé <b>' + esc(filename) + '</b>.</p><textarea class="copybox" id="ex-text" readonly>' + esc(text) + '</textarea>', '<button class="btn btn-accent" id="ex-copy">Copier</button>', root => { root.querySelector('#ex-copy').addEventListener('click', () => copyText(text, root.querySelector('#ex-text'))); });
+}
+function backupJSON(){
+  const dump = { app: 'carnet-transit', version: 1, exportedAt: nowISO(), data: {} };
+  COLLS.forEach(c => { dump.data[c] = S[c].map(d => Object.assign({}, d)); });
+  deliverFile('carnet-sauvegarde-' + todayISO() + '.json', JSON.stringify(dump, null, 1), 'application/json', 'Sauvegarde');
+}
+function openRestore(){
+  openSheet('Restaurer une sauvegarde',
+    '<p class="small muted">Choisis un fichier <b>carnet-sauvegarde-….json</b>. Les fiches du fichier sont ajoutées ou mises à jour ; rien n’est supprimé.</p><div class="field"><label for="rs-file">Fichier</label><input id="rs-file" type="file" accept=".json,application/json"></div><div id="rs-info" class="small muted"></div>',
+    '<button class="btn btn-accent" id="rs-go" disabled>Restaurer</button>',
+    root => {
+      let dump = null; const q = s => root.querySelector(s);
+      q('#rs-file').addEventListener('change', () => { const f = q('#rs-file').files[0]; if (!f) return; const r = new FileReader(); r.onload = () => { try { const j = JSON.parse(r.result); if (!j || j.app !== 'carnet-transit' || !j.data) throw new Error('format'); dump = j; const n = COLLS.reduce((s, c) => s + ((j.data[c] || []).length), 0); q('#rs-info').textContent = 'Sauvegarde du ' + (j.exportedAt || '').slice(0, 10) + ' · ' + plural(n, 'fiche') + '.'; q('#rs-go').disabled = false; } catch (e) { dump = null; q('#rs-info').textContent = 'Ce fichier n’est pas une sauvegarde du carnet.'; q('#rs-go').disabled = true; } }; r.readAsText(f); });
+      q('#rs-go').addEventListener('click', async () => { if (!dump) return; q('#rs-go').disabled = true; let n = 0; for (const c of COLLS) for (const d of (dump.data[c] || [])) { if (!d || !d.id) continue; if (await write(c, d.id, stripId(d))) n++; } closeSheet(); toast(plural(n, 'fiche') + ' restaurée' + (n > 1 ? 's' : '')); });
+    });
+}
+// ---------- events ----------
+function go(tab){ nav.tab = tab; nav.detail = null; pref.set('tab', tab); render(); window.scrollTo(0, 0); }
+document.addEventListener('click', async e => {
+  const el = e.target.closest('[data-act]'); if (!el) return;
+  const act = el.dataset.act, id = el.dataset.id;
+  switch (act) {
+    case 'tab': go(el.dataset.tab); break;
+    case 'back': nav.detail = null; render(); break;
+    case 'open-client': nav.detail = { kind: 'client', id: id }; render(); window.scrollTo(0, 0); break;
+    case 'open-fourn': nav.detail = { kind: 'fourn', id: id }; render(); window.scrollTo(0, 0); break;
+    case 'new-presta': openPrestaForm({ clientId: id }); break;
+    case 'edit-presta': openPrestaForm({ id: id }); break;
+    case 'new-paiement': openPaiementForm({ clientId: id }); break;
+    case 'edit-paiement': openPaiementForm({ id: id }); break;
+    case 'new-reglement': openReglementForm({ fournisseurId: id }); break;
+    case 'edit-reglement': openReglementForm({ id: id }); break;
+    case 'new-client': openClientForm({}); break;
+    case 'edit-client': openClientForm({ id: id }); break;
+    case 'new-fourn': openFournForm({}); break;
+    case 'edit-fourn': openFournForm({ id: id }); break;
+    case 'new-type': openTypeForm({}); break;
+    case 'edit-type': openTypeForm({ id: id }); break;
+    case 'set-tarif': openTarifForm('client', id, el.dataset.type); break;
+    case 'set-cout': openTarifForm('fourn', id, el.dataset.type); break;
+    case 'recap': openRecap(id); break;
+    case 'copy': copyText(el.dataset.text); break;
+    case 'close-sheet': closeSheet(); break;
+    case 'set-filter': filters[el.dataset.k] = el.dataset.v; render(); break;
+    case 'month-prev': filters.month = filters.month === 'all' ? monthKey(todayISO()) : shiftMonth(filters.month, -1); render(); break;
+    case 'month-next': filters.month = filters.month === 'all' ? monthKey(todayISO()) : shiftMonth(filters.month, 1); render(); break;
+    case 'month-all': filters.month = filters.month === 'all' ? monthKey(todayISO()) : 'all'; render(); break;
+    case 'export': exportCSV(el.dataset.kind); break;
+    case 'backup': backupJSON(); break;
+    case 'restore': openRestore(); break;
+    case 'logout': if (window.CARNET_LOGOUT) window.CARNET_LOGOUT(); break;
+    case 'purge-demo': armDelete(el, purgeDemo); break;
+    case 'relance-done': { const c = S.clients.find(x => x.id === id); if (c && await write('clients', id, Object.assign(stripId(c), { relance: null }))) toast('Relance faite'); break; }
+    case 'del-client': armDelete(el, async () => { if (await remove('clients', id)) { nav.detail = null; toast('Client supprimé'); } }); break;
+    case 'del-fourn': armDelete(el, async () => { if (await remove('fournisseurs', id)) { nav.detail = null; toast('Contact supprimé'); } }); break;
+  }
+});
+document.addEventListener('click', e => { if (e.target.id === 'sheet-root') closeSheet(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && sheetOpen) closeSheet(); });
+let searchTimer = null;
+document.addEventListener('input', e => {
+  const t = e.target;
+  if (t.id === 'presta-search' || t.id === 'client-search' || t.id === 'fourn-search') {
+    const key = t.id === 'presta-search' ? 'q' : (t.id === 'client-search' ? 'cq' : 'fq');
+    filters[key] = t.value;
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => { const pos = t.selectionStart; render(); const n = $('#' + t.id); if (n) { n.focus(); try { n.setSelectionRange(pos, pos); } catch (err) {} } }, 180);
+  }
+});
+document.addEventListener('change', async e => {
+  if (e.target.id === 'set-cc') { const cc = e.target.value.replace(/\D/g, '') || '33'; await write('settings', 'main', Object.assign(stripId(settings()), { cc: cc })); toast('Indicatif enregistré'); }
+});
+
+// ---------- boot (version autonome : Supabase ou local) ----------
+const CONFIG = window.CARNET_CONFIG || {};
+const TABS = ['home', 'prestas', 'clients', 'fournisseurs', 'plus'];
+function initNav(){
+  const t = pref.get('tab', 'home'); if (TABS.includes(t)) nav.tab = t;
+  const h = (location.hash || '').slice(1); if (TABS.includes(h)) { nav.tab = h; nav.detail = null; }
+}
+function subscribeAll(){ COLLS.forEach(c => store.subscribe(c, rows => { S[c] = rows; loaded.add(c); render(); })); }
+function setPill(txt, ok){ const el = $('#lock-txt'), pill = $('#lock-pill'); el.textContent = txt; pill.classList.toggle('ok', !!ok); }
+
+function makeSupabaseStore(client, userId){
+  const subs = {}; let cache = {}; let ready = false;
+  const rows = coll => Object.keys(cache[coll] || {}).map(id => Object.assign({ id: id }, cache[coll][id]));
+  const emit = coll => (subs[coll] || []).forEach(cb => cb(rows(coll)));
+  async function loadAll(){
+    const res = await client.from('carnet_docs').select('id,coll,data').eq('user_id', userId).limit(20000);
+    if (res.error) throw res.error;
+    const next = {}; res.data.forEach(r => { (next[r.coll] = next[r.coll] || {})[r.id] = r.data || {}; });
+    cache = next; ready = true; COLLS.forEach(emit);
+  }
+  let timer = null; const refresh = () => loadAll().catch(e => console.warn('refresh', e));
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) refresh(); });
+  window.addEventListener('online', refresh);
+  timer = setInterval(refresh, 45000);
+  try {
+    client.channel('carnet-' + userId.slice(0, 8))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'carnet_docs', filter: 'user_id=eq.' + userId }, payload => {
+        const r = payload.new && payload.new.id ? payload.new : null; const o = payload.old && payload.old.id ? payload.old : null;
+        if (payload.eventType === 'DELETE') { const coll = o && o.coll; if (coll && cache[coll]) { delete cache[coll][o.id]; emit(coll); } else refresh(); return; }
+        if (r) { (cache[r.coll] = cache[r.coll] || {})[r.id] = r.data || {}; emit(r.coll); }
+      }).subscribe();
+  } catch (e) { console.warn('realtime', e); }
+  return {
+    kind: 'supabase',
+    subscribe(coll, cb){ (subs[coll] = subs[coll] || []).push(cb); if (ready) setTimeout(() => cb(rows(coll)), 0); return () => { subs[coll] = (subs[coll] || []).filter(f => f !== cb); }; },
+    async set(coll, id, d){
+      const body = JSON.parse(JSON.stringify(d));
+      const res = await client.from('carnet_docs').upsert({ user_id: userId, id: id, coll: coll, data: body, updated_at: new Date().toISOString() }, { onConflict: 'user_id,id' });
+      if (res.error) throw Object.assign(new Error(res.error.message), { code: res.error.code === '42501' ? 'invalid_argument' : 'unavailable' });
+      (cache[coll] = cache[coll] || {})[id] = body; emit(coll);
+    },
+    async del(coll, id){
+      const res = await client.from('carnet_docs').delete().eq('user_id', userId).eq('id', id);
+      if (res.error) throw Object.assign(new Error(res.error.message), { code: 'unavailable' });
+      if (cache[coll]) { delete cache[coll][id]; emit(coll); }
+    },
+    load: loadAll
+  };
+}
+function showLogin(client, msg){
+  $$('.view').forEach(v => { v.hidden = true; });
+  const el = $('#view-home'); el.hidden = false; $('#fab').hidden = true;
+  el.innerHTML = '<div class="private card" style="text-align:left"><h2 style="text-align:center">Connexion</h2><p class="muted small" style="text-align:center">Ton carnet est privé : connecte-toi avec ton compte.</p>' +
+    '<form id="login-form"><div class="form-err" id="login-err">' + esc(msg || '') + '</div><div class="field"><label for="lg-email">E-mail</label><input id="lg-email" type="email" autocomplete="username" inputmode="email" value="' + esc(pref.get('lastEmail', '')) + '"></div>' +
+    '<div class="field"><label for="lg-pass">Mot de passe</label><input id="lg-pass" type="password" autocomplete="current-password"></div>' +
+    '<button class="btn btn-accent btn-block" id="lg-go" type="submit">Se connecter</button></form>' +
+    '<p class="small muted" style="margin:14px 0 0;text-align:center"><button class="btn btn-ghost btn-sm" type="button" id="lg-forgot">Mot de passe oublié</button></p></div>';
+  setPill('Non connecté', false);
+  $('#login-form').addEventListener('submit', async e => {
+    e.preventDefault(); const btn = $('#lg-go'); btn.disabled = true; $('#login-err').textContent = '';
+    const email = $('#lg-email').value.trim(), password = $('#lg-pass').value;
+    const res = await client.auth.signInWithPassword({ email: email, password: password });
+    if (res.error) { $('#login-err').textContent = /invalid/i.test(res.error.message) ? 'E-mail ou mot de passe incorrect.' : 'Connexion impossible : ' + res.error.message; btn.disabled = false; return; }
+    pref.set('lastEmail', email);
+    runSession(client, res.data.session);
+  });
+  $('#lg-forgot').addEventListener('click', async () => {
+    const email = $('#lg-email').value.trim(); if (!email) { $('#login-err').textContent = 'Saisis ton e-mail d’abord.'; return; }
+    const res = await client.auth.resetPasswordForEmail(email, { redirectTo: location.origin + location.pathname });
+    $('#login-err').textContent = res.error ? 'Envoi impossible : ' + res.error.message : 'E-mail de réinitialisation envoyé (regarde tes spams).';
+  });
+  setTimeout(() => { const i = $(pref.get('lastEmail', '') ? '#lg-pass' : '#lg-email'); if (i) i.focus(); }, 50);
+}
+async function runSession(client, session){
+  const userId = session.user.id;
+  window.CARNET_ACCOUNT = session.user.email || '';
+  window.CARNET_LOGOUT = async () => { await client.auth.signOut(); location.reload(); };
+  $('#view-home').innerHTML = '<div class="loading"><div class="spin"></div>Chargement de ton carnet…</div>';
+  $$('.view').forEach(v => { v.hidden = v.id !== 'view-home'; });
+  store = makeSupabaseStore(client, userId);
+  try { await store.load(); } catch (e) { console.error(e); $('#view-home').innerHTML = '<div class="private card"><h2>Base injoignable</h2><p class="muted">' + esc(e.message || 'Vérifie ta connexion et que la table carnet_docs existe.') + '</p><button class="btn btn-accent" onclick="location.reload()">Réessayer</button></div>'; return; }
+  setPill('Privé · ' + (session.user.email || 'toi').split('@')[0], true);
+  subscribeAll();
+}
+async function startStandalone(){
+  initNav();
+  if (CONFIG.supabaseUrl && CONFIG.supabaseKey) {
+    if (!window.supabase || !window.supabase.createClient) { $('#view-home').innerHTML = '<div class="private card"><h2>Librairie manquante</h2><p class="muted">Le script Supabase n’a pas pu être chargé. Vérifie ta connexion internet puis recharge.</p></div>'; return; }
+    const client = window.supabase.createClient(CONFIG.supabaseUrl, CONFIG.supabaseKey);
+    if (/type=recovery/.test(location.hash)) {
+      // retour du lien "mot de passe oublié"
+      $$('.view').forEach(v => { v.hidden = true; }); const el = $('#view-home'); el.hidden = false;
+      el.innerHTML = '<div class="private card" style="text-align:left"><h2 style="text-align:center">Nouveau mot de passe</h2><form id="np-form"><div class="form-err" id="np-err"></div><div class="field"><label for="np-pass">Mot de passe</label><input id="np-pass" type="password" autocomplete="new-password" minlength="8"></div><button class="btn btn-accent btn-block" type="submit">Enregistrer</button></form></div>';
+      $('#np-form').addEventListener('submit', async e => { e.preventDefault(); const r = await client.auth.updateUser({ password: $('#np-pass').value }); if (r.error) { $('#np-err').textContent = r.error.message; return; } history.replaceState(null, '', location.pathname); location.reload(); });
+      return;
+    }
+    const got = await client.auth.getSession();
+    const session = got && got.data ? got.data.session : null;
+    if (!session) { showLogin(client); return; }
+    client.auth.onAuthStateChange((ev) => { if (ev === 'SIGNED_OUT') location.reload(); });
+    await runSession(client, session);
+  } else {
+    store = makeLocalStore(); setPill('Local', false); subscribeAll();
+  }
+}
+startStandalone();
+})();
+</script>
+</body>
+</html>
