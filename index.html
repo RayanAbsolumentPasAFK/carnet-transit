@@ -1129,6 +1129,15 @@ function initNav(){
   const h = (location.hash || '').slice(1); if (TABS.includes(h)) { nav.tab = h; nav.detail = null; }
 }
 function subscribeAll(){ COLLS.forEach(c => store.subscribe(c, rows => { S[c] = rows; loaded.add(c); render(); })); }
+// premier démarrage : les deux documents de base, avec les prix habituels (modifiables dans Plus)
+async function seedTypesIfEmpty(){
+  if (pref.get('seeded:' + store.kind, false)) return;
+  pref.set('seeded:' + store.kind, true);
+  const check = () => new Promise(res => { const un = store.subscribe('types', rows => { un(); res(rows); }); });
+  const rows = await check(); if (rows.length) return;
+  await write('types', 'cpi', { code: 'CPI', label: 'Certificat provisoire d’immatriculation', sell: 70, cost: 40, order: 1 });
+  await write('types', 'exa', { code: 'EXA', label: 'Déclaration en douane (export)', sell: 50, cost: 25, order: 2 });
+}
 function setPill(txt, ok){ const el = $('#lock-txt'), pill = $('#lock-pill'); el.textContent = txt; pill.classList.toggle('ok', !!ok); }
 
 function makeSupabaseStore(client, userId){
@@ -1204,6 +1213,7 @@ async function runSession(client, session){
   try { await store.load(); } catch (e) { console.error(e); $('#view-home').innerHTML = '<div class="private card"><h2>Base injoignable</h2><p class="muted">' + esc(e.message || 'Vérifie ta connexion et que la table carnet_docs existe.') + '</p><button class="btn btn-accent" onclick="location.reload()">Réessayer</button></div>'; return; }
   setPill('Privé · ' + (session.user.email || 'toi').split('@')[0], true);
   subscribeAll();
+  seedTypesIfEmpty();
 }
 async function startStandalone(){
   initNav();
@@ -1223,7 +1233,7 @@ async function startStandalone(){
     client.auth.onAuthStateChange((ev) => { if (ev === 'SIGNED_OUT') location.reload(); });
     await runSession(client, session);
   } else {
-    store = makeLocalStore(); setPill('Local', false); subscribeAll();
+    store = makeLocalStore(); setPill('Local', false); subscribeAll(); seedTypesIfEmpty();
   }
 }
 startStandalone();
